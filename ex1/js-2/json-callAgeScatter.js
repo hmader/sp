@@ -90,7 +90,7 @@ function callAgeScatter(chartID) {
 
         // scatter plot
         var circles = svg.selectAll("circle")
-            .data(filtered)
+            .data(zipcodesDataset)
             .enter()
             .append("circle");
 
@@ -115,7 +115,7 @@ function callAgeScatter(chartID) {
 
         // Circles to show the values for the year on hover
         circle = svg.append("circle")
-            .attr("r", 5)
+            .attr("r", 4)
             .attr("opacity", 0)
             .attr("stroke-width", 2.5)
             .attr("fill", "#fff")
@@ -125,7 +125,7 @@ function callAgeScatter(chartID) {
 ======================================================================*/
         // Draw the circles for voronoi
         svg.selectAll("circle.voronoi")
-            .data(filtered)
+            .data(zipcodesDataset)
             .enter()
             .append("circle")
             .attr("class", function (d) {
@@ -161,7 +161,7 @@ function callAgeScatter(chartID) {
 
         //Create the Voronoi grid
         voronoiGroup.selectAll("path")
-            .data(voronoi(filtered)) //Use vononoi() with your dataset inside
+            .data(voronoi(zipcodesDataset)) //Use vononoi() with your dataset inside
             .enter().append("path")
             .filter(function (d) {
                 return d !== undefined;
@@ -212,7 +212,7 @@ function callAgeScatter(chartID) {
         return tooltip
             .style("top", (d3.event.pageY) - 80 + "px")
             .style("left", (d3.event.pageX + 15) + "px")
-            .html("<p class='sans'><span class='tooltipHeader'>Zipcode: " + d.zipcode + "</span><br>Rate: " + d3.format(".2f")(d.total) + "<br>Age Diagnosis: " + d.age_diagnosis + "</p>");
+            .html("<p class='sans'><span class='tooltipHeader'>Zipcode: " + d.zipcode + "</span><br>Year: "+ d.year +"<br>Age Diagnosis: " + d.age_diagnosis + "<br>Rate: " + d3.format(".2f")(d.total) + "</p>");
     }
 
     function mouseoutFunc(d) {
