@@ -24,7 +24,7 @@ function callRaceRateLines(chartID) {
     }).left;
 
     var color = d3.scale.ordinal()
-        .range(["#ca0020", "#f4a582", "#92c5de", "#0571b0"])
+        .range(["#f1735f", "#f4a582", "#fce297"])
         .domain(races);
 
     var dateFormat = d3.time.format("%Y");
@@ -139,8 +139,8 @@ function callRaceRateLines(chartID) {
             .call(xAxis)
             .append("text")
             .attr("class", "label")
-            .attr("x", width - margin.left - margin.right - 10)
-            .attr("y", -margin.bottom - 10)
+            .attr("x", width - margin.left - margin.right)
+            .attr("y", 20)
             .attr("dy", "2em")
             .style("text-anchor", "end")
             .attr("class", "label")
@@ -152,9 +152,9 @@ function callRaceRateLines(chartID) {
             .call(yAxis)
             .append("text")
             .attr("class", "label")
-            .attr("transform", "rotate(90)")
-            .attr("x", margin.top + 10)
-            .attr("y", -30)
+            .attr("transform", "rotate(-90)")
+            .attr("x", -height + margin.bottom + margin.top)
+            .attr("y", -60)
             .attr("dy", "1em")
             .style("text-anchor", "start")
             .attr("class", "label")
@@ -237,6 +237,9 @@ function callRaceRateLines(chartID) {
         voronoiGroup.selectAll("path")
             .data(voronoi(dataset)) //Use vononoi() with your dataset inside
             .enter().append("path")
+            .filter(function (d) {
+                return d !== undefined;
+            })
             .attr("d", function (d, i) {
                 return "M" + d.join("L") + "Z";
             })

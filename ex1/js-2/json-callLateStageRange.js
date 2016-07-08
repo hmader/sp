@@ -59,7 +59,7 @@ function callLateStageRange(chartID) {
         .attr("width", width)
         .attr("height", height);
 
-// get range (high/low) for each year function
+    // get range (high/low) for each year function
     getRange();
 
     function getRange() {
@@ -69,8 +69,8 @@ function callLateStageRange(chartID) {
                 return a.late_stage_percentage - b.late_stage_percentage;
             });
         });
-        
-        nestByYear.forEach(function(d, i) {
+
+        nestByYear.forEach(function (d, i) {
             var end = d.values.length - 1;
             highest.push({
                 year: "" + d.key,
@@ -92,7 +92,7 @@ function callLateStageRange(chartID) {
 
         console.log(highest, lowest);
     }
-    
+
     draw();
 
     function draw() {
@@ -143,8 +143,6 @@ function callLateStageRange(chartID) {
             Drawing
            ================================= */
 
-        drawAxes();
-
         // Chart Title
         svg.append("text")
             .attr("class", "chart-title")
@@ -155,6 +153,7 @@ function callLateStageRange(chartID) {
             .text("Late Stage % for " + cancerType + " in " + county + " County");
 
         drawRange();
+        drawAxes();
         drawCountyLine();
 
     }
@@ -194,8 +193,8 @@ function callLateStageRange(chartID) {
             .call(xAxis)
             .append("text")
             .attr("class", "label")
-            .attr("x", width - margin.left - margin.right - 10)
-            .attr("y", -margin.bottom + 10)
+            .attr("x", width - margin.left - margin.right)
+            .attr("y", margin.top - margin.bottom + 10)
             .attr("dy", "2em")
             .style("text-anchor", "end")
             .attr("class", "label")
@@ -207,9 +206,9 @@ function callLateStageRange(chartID) {
             .call(yAxis)
             .append("text")
             .attr("class", "label")
-            .attr("transform", "rotate(90)")
-            .attr("x", margin.top + 10)
-            .attr("y", -30)
+            .attr("transform", "rotate(-90)")
+            .attr("x", -height + margin.bottom)
+            .attr("y", -60)
             .attr("dy", "1em")
             .style("text-anchor", "start")
             .attr("class", "label")
@@ -260,14 +259,14 @@ function callLateStageRange(chartID) {
             .attr("class", "area")
             .attr("fill", function (d) {
                 if (d.bound == "highest") {
-                    return "#ccc";
+                    return "#f1735f";
                 } else {
                     return "#ffffff";
                 }
             })
             .attr("opacity", function (d) {
                 if (d.bound == "highest") {
-                    return .25;
+                    return .17;
                 } else {
                     return 1;
                 }
@@ -370,6 +369,9 @@ function callLateStageRange(chartID) {
         voronoiGroup.selectAll("path")
             .data(voronoi(datasetYears)) //Use vononoi() with your dataset inside
             .enter().append("path")
+            .filter(function (d) {
+                return d !== undefined;
+            })
             .attr("d", function (d, i) {
                 return "M" + d.join("L") + "Z";
             })
