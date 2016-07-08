@@ -109,12 +109,12 @@ function callCountyRanking(chartID) {
             .call(xAxis)
             .append("text")
             .attr("class", "label")
-            .attr("x", width - margin.right)
+            .attr("x", width - margin.right - margin.left)
             .attr("y", margin.top - 10)
             .attr("dy", "2em")
             .style("text-anchor", "end")
             .attr("class", "label")
-            .text("");
+            .text("County");
 
         svg.append("g")
             .attr("class", "y axis")
@@ -138,7 +138,8 @@ function callCountyRanking(chartID) {
             .attr("dy", "1em")
             .style("text-anchor", "start")
             .text(function () {
-                return ("Out of all " + nestByCounty.length + " Counties in Florida, " + thisCountyDataset.county.name + " County is number " + " Late Stage Percentages in " + thisCountyDataset.cancer.name + " on average from 2004 to 2013");
+//                return ("Out of all " + nestByCounty.length + " Counties in Florida, " + thisCountyDataset.county.name + " County is number " + " Late Stage Percentages in " + thisCountyDataset.cancer.name + " on average from 2004 to 2013");
+            return ("Average (from 2004-2013) Late Stage % for "+ thisCountyDataset.cancer.name + " by County");
             });
 
         svg.selectAll("rect.bar")
