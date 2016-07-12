@@ -13,26 +13,30 @@
 
 <body>
     <section class="text">
-        <h1 class="header">Scan Portal Expl.1 - Breast Cancer - Female</h1>
+        <h1 class="header">Scan Portal Expl.1</h1>
         <p>Select a County</p>
         <select id="county-selector"></select>
     </section>
     <section id="charts">
-        <div id="chart0" class="chart"></div>
-        <div id="chart1" class="chart"></div>
-        <div id="chart2" class="chart"></div>
-        <div id="chart3" class="chart"></div>
-        <div id="chart4" class="chart"></div>
-        <div id="chart5" class="chart"></div>
-        <div id="chart6" class="chart"></div>
-        <div id="chart7" class="chart"></div>
-        <div id="chart8" class="chart"></div>
+        <div id="countyBarChart" class="chart"></div>
+        <div id="zipcodeBarChart" class="chart"></div>
+        <div id="lateStageRangeChart" class="chart"></div>
+        <div id="countAreaChart" class="chart"></div>
+        <section class="col-2">
+            <div id="racePieChart" class="chart"></div>
+            <div id="genderPieChart" class="chart"></div>
+        </section>
+        <div id="raceRateLineChart" class="chart"></div>
+        <div id="raceSmallMultiplesChart" class="chart"></div>
+        <div id="genderRateLineChart" class="chart"></div>
+        <div id="zipcodeScatterChart" class="chart"></div>
     </section>
 
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
     <script src="//d3js.org/d3.v3.min.js"></script>
     <script src="//d3js.org/queue.v1.min.js"></script>
     <script type="text/javascript" src="js-2/global-vars.js"></script>
+    <script src="js-2/d3-legend.min.js"></script>
     <script type="text/javascript" src="js-2/json-callCountArea.js"></script>
     <script type="text/javascript" src="js-2/json-callLateStageLine.js"></script>
     <script type="text/javascript" src="js-2/json-callLateStageRange.js"></script>
@@ -45,6 +49,7 @@
     <script type="text/javascript" src="js-2/json-callRPie.js"></script>
     <script type="text/javascript" src="js-2/json-callAgeScatter.js"></script>
     <script type="text/javascript" src="js-2/json-api.js"></script>
+    <script type="text/javascript" src="js-2/json-callGPie.js"></script>
     <!--                <script type="text/javascript" src="js-2/json-api.js"></script>-->
     <!--    <script type="text/javascript" src="js-2/main.js"></script>-->
 </body>

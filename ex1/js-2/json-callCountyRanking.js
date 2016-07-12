@@ -98,6 +98,7 @@ function callCountyRanking(chartID) {
 
         xScale.domain(
             averages.map(function (d) {
+//                console.log(countyMap[d.county]);
                 return d.county;
             })
         );
@@ -194,7 +195,7 @@ function callCountyRanking(chartID) {
         return tooltip
             .style("top", (d3.event.pageY) - 80 + "px")
             .style("left", (d3.event.pageX + 15) + "px")
-            .html("<p class='sans'><span class='tooltipHeader'>" + d.county + " County</span><br>Mean LS%: " + d3.format('%')(d.mean) + "</p>");
+            .html("<p class='sans'><span class='tooltipHeader'>" + countyMap[d.county] + " County</span><br>Mean LS%: " + d3.format('%')(d.mean) + "</p>");
     }
 
     function mouseoutFunc(d) {

@@ -8,15 +8,18 @@ if ($(window).width() > 900) {
 
 // global dataset variables
 
+// These are the datasets after filtering/ formatting
 var mapByCounty;
 var nestByCounty;
 var nestByYear;
 
+// this is the raw json data, before filtering/ formatting
 var allCountiesDataset;
 var zipcodesDataset;
 var thisCountyDataset;
+var countyMap;
 
-var races = ["asian", "black", "white"];
+var races = ["asian", "black", "hispanic", "white", "other"];
 var genders = ["female", "male"];
 
 // county select

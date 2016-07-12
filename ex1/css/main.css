@@ -3,35 +3,42 @@ body {
     margin: 0;
 }
 
-h1, h2, h3, h4, h5 {
- font-weight: 500;   
+h1,
+h2,
+h3,
+h4,
+h5 {
+    font-weight: 500;
 }
 
 h1 {
- margin-bottom: 2em;   
+    margin-bottom: 2em;
 }
 
 section.text {
- padding: 0 3em;   
+    padding: 0 3em;
 }
 
 .col-2 {
+    display: -webkit-flex;
     display: flex;
+    -webkit-flex-direction: row;
     flex-direction: row;
+    -webkit-flex-wrap: wrap;
+    flex-wrap: wrap;
 }
 
 #charts {
- display: -webkit-flex;
- display: flex;
--webkit-flex-direction: column;
-flex-direction: column;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-direction: column;
+    flex-direction: column;
     -webkit-align-items: center;
     align-items: center;
-    
 }
 
 .chart {
- margin-bottom: 5em; 
+    margin-bottom: 5em;
     max-width: 800px;
 }
 
@@ -54,7 +61,9 @@ flex-direction: column;
     font-size: 12.5px;
 }
 
+
 /*  svg text tooltip that appears over the chart, relative to the chart rather than relative to the cursor  */
+
 .chart-tooltip {
     font-size: 12px;
     fill: #000;
@@ -69,12 +78,20 @@ svg {
 }
 
 .chart-title {
- font-weight: bold;   
+    font-weight: bold;
 }
 
 .axis text {
     font-size: .75em;
     fill: #aaa;
+}
+
+.axis .subtitle,
+.multiples-caption,
+.curYear,
+.static-year {
+    fill: #666;
+    font-size: .75em;
 }
 
 .axis .label {
@@ -89,7 +106,8 @@ svg {
     shape-rendering: crispEdges;
 }
 
-.y.axis .tick line {
+.y.axis .tick line,
+.x.axis .tick line {
     stroke: #f2f2f2;
 }
 
@@ -116,5 +134,10 @@ svg {
 }
 
 .bar:hover {
- opacity: 1;   
+    opacity: 1;
+}
+
+.hidden {
+  display:none;
+  opacity: 0.0;
 }

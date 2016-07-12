@@ -7,6 +7,7 @@ function callAgeScatter(chartID) {
         left: 100
     };
 
+    var nonNullZipcodes;
     var dotRadius = 3.5;
     var circle;
 
@@ -42,20 +43,25 @@ function callAgeScatter(chartID) {
 
     function draw() {
 
-        var filtered = zipcodesDataset.filter(function (d) {
+        var nonNullZipcodes = zipcodesDataset.filter(function (d) {
+            return d.total != null;
+        });
+        
+        
+        var filtered = nonNullZipcodes.filter(function (d) {
             return d.year == 2013;
         });
 
-        xScale.domain([0, d3.max(zipcodesDataset, function (d) {
+        xScale.domain([0, d3.max(nonNullZipcodes, function (d) {
             return +d.age_diagnosis;
         })]);
 
-        yScale.domain([0, d3.max(zipcodesDataset, function (d) {
+        yScale.domain([0, d3.max(nonNullZipcodes, function (d) {
             return +d.total;
         })]);
 
 
-        colorScale.domain([0, d3.max(zipcodesDataset, function (d) {
+        colorScale.domain([0, d3.max(nonNullZipcodes, function (d) {
             return +d.total;
         })]);
 
@@ -90,7 +96,7 @@ function callAgeScatter(chartID) {
 
         // scatter plot
         var circles = svg.selectAll("circle")
-            .data(zipcodesDataset)
+            .data(nonNullZipcodes)
             .enter()
             .append("circle");
 
@@ -125,7 +131,7 @@ function callAgeScatter(chartID) {
 ======================================================================*/
         // Draw the circles for voronoi
         svg.selectAll("circle.voronoi")
-            .data(zipcodesDataset)
+            .data(nonNullZipcodes)
             .enter()
             .append("circle")
             .attr("class", function (d) {
@@ -161,7 +167,7 @@ function callAgeScatter(chartID) {
 
         //Create the Voronoi grid
         voronoiGroup.selectAll("path")
-            .data(voronoi(zipcodesDataset)) //Use vononoi() with your dataset inside
+            .data(voronoi(nonNullZipcodes)) //Use vononoi() with your dataset inside
             .enter().append("path")
             .filter(function (d) {
                 return d !== undefined;
@@ -176,7 +182,7 @@ function callAgeScatter(chartID) {
             .attr("class", function (d, i) {
                 return "voronoi " + d.zipcode;
             })
-//            .style("stroke", "#2074A0") //If you want to look at the cells
+            //            .style("stroke", "#2074A0") //If you want to look at the cells
             .style("fill", "none")
             .style("pointer-events", "all")
             .on("mouseover", mouseoverFunc)
@@ -212,7 +218,7 @@ function callAgeScatter(chartID) {
         return tooltip
             .style("top", (d3.event.pageY) - 80 + "px")
             .style("left", (d3.event.pageX + 15) + "px")
-            .html("<p class='sans'><span class='tooltipHeader'>Zipcode: " + d.zipcode + "</span><br>Year: "+ d.year +"<br>Age Diagnosis: " + d.age_diagnosis + "<br>Rate: " + d3.format(".2f")(d.total) + "</p>");
+            .html("<p class='sans'><span class='tooltipHeader'>Zipcode: " + d.county + "</span><br>Year: " + d.year + "<br>Age Diagnosis: " + d.age_diagnosis + "<br>Rate: " + d3.format(".2f")(d.total) + "</p>");
     }
 
     function mouseoutFunc(d) {

@@ -24,9 +24,9 @@ function callRaceRateLines(chartID) {
     }).left;
 
     var color = d3.scale.ordinal()
-        .range(["#f1735f", "#f4a582", "#fce297"])
+        .range(["#f8f7ce", "#ffe59a", "#ffca7d", "#f6755f", "#ffaf71"])
         .domain(races);
-
+                
     var dateFormat = d3.time.format("%Y");
 
     //Configure line generator

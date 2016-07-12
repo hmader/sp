@@ -11,7 +11,7 @@ function callCountArea(chartID) {
         top: 60,
         right: 10,
         bottom: 50,
-        left: 100
+        left: 90
     };
 
     //Set up date formatting and years

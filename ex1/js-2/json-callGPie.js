@@ -1,16 +1,14 @@
-function callRPie(chartID) {
+function callGPie(chartID) {
 
     var width = 400,
         height = 360,
         radius = Math.min(2*width/3, 2*height/3) / 2;
-
-    var population = ["asian", "black", "hispanic", "native_american", "white"];
-
+    
     var reformatted = [];
 
     var color = d3.scale.ordinal()
-        .range(["#f8f7ce", "#ffe59a", "#ffca7d", "#ffaf71", "#f6755f"])
-        .domain(population);
+        .range(["#f6755f", "#ffaf71"])
+        .domain(genders);
 
     var arc = d3.svg.arc()
         .outerRadius(radius - 10)
@@ -37,11 +35,10 @@ function callRPie(chartID) {
 
     function setupData() {
         var countyPop = thisCountyDataset.population;
-        population.forEach(function (d) {
-            var total = countyPop[d + "_female"] + countyPop[d + "_male"];
+        genders.forEach(function (d) {
             reformatted.push({
-                race: d,
-                total: total
+                gender: d,
+                total: countyPop[d]
             });
         });
     };
@@ -58,7 +55,7 @@ function callRPie(chartID) {
         g.append("path")
             .attr("d", arc)
             .style("fill", function (d) {
-                return color(d.data.race);
+                return color(d.data.gender);
             });
 
         var linear = color;

@@ -1,23 +1,24 @@
 var countyNumber = 367;
 var startYear = 2004;
 var endYear = 2013;
-var cancerType = 5;
+var cancerType = 10;
 
 
 /*=====================================================================
  loaded()
 ======================================================================*/
-function loaded(error, allCounties, allZips, thisCounty) { // load in all of the data to be used in the viz
+function loaded(error, allCounties, allZips, thisCounty, countyNameMap) { // load in all of the data to be used in the viz
 
     // set all of the data to global data variables
     allCountiesDataset = allCounties;
     zipcodesDataset = allZips;
     thisCountyDataset = thisCounty;
+    countyMap = countyNameMap;
 
+    // formatting
     setupData(allCountiesDataset);
     // call the function(s) - unless we have multiple pages or triggers, just call all of the chart functions
     callAllCharts();
-
 }
 /*=====================================================================
  queue Data
@@ -26,6 +27,7 @@ queue()
     .defer(d3.json, 'http://scanportal.org/json/county/raw/' + cancerType) // all counties in FL
     .defer(d3.json, 'http://scanportal.org/json/zipcode/raw/' + countyNumber + '/' + cancerType)
     .defer(d3.json, 'http://scanportal.org/json/county/' + countyNumber + '/' + cancerType + '/' + startYear + '/' + endYear) // all zipcodes
+    .defer(d3.json, 'http://scanportal.org/api/counties') // county id - name map
     .await(loaded);
 
 
@@ -57,15 +59,16 @@ function setupData(d) {
 =====================================================================*/
 
 function callAllCharts() {
-        callCountyRanking("#chart0");
-    //    callZipCodeRankings("#chart1");
-        callLateStageRange("#chart2");
-        callCountArea("#chart3");
-//        callRPie("#chart4");
-        callRaceRateLines("#chart5");
-        callRaceMultsArea("#chart6");
-    callGenderRateLines("#chart7");
-    callAgeScatter("#chart8");
+    callCountyRanking("#countyBarChart");
+    callZipCodeRankings("#zipcodeBarChart");
+    callLateStageRange("#lateStageRangeChart");
+    callCountArea("#countAreaChart");
+    callRPie("#racePieChart");
+    callGPie("#genderPieChart");
+    callRaceRateLines("#raceRateLineChart");
+    callRaceMultsArea("#raceSmallMultiplesChart");
+    callGenderRateLines("#genderRateLineChart");
+    callAgeScatter("#zipcodeScatterChart");
 }
 
 /*=====================================================================
