@@ -2,8 +2,8 @@ function callGPie(chartID) {
 
     var width = 400,
         height = 360,
-        radius = Math.min(2*width/3, 2*height/3) / 2;
-    
+        radius = Math.min(2 * width / 3, 2 * height / 3) / 2;
+
     var reformatted = [];
 
     var color = d3.scale.ordinal()
@@ -38,7 +38,8 @@ function callGPie(chartID) {
         genders.forEach(function (d) {
             reformatted.push({
                 gender: d,
-                total: countyPop[d]
+                total: countyPop[d],
+                percentage: countyPop[d]/countyPop.total
             });
         });
     };
@@ -56,14 +57,18 @@ function callGPie(chartID) {
             .attr("d", arc)
             .style("fill", function (d) {
                 return color(d.data.gender);
-            });
+            })
+            .on("mouseover", mouseover)
+            .on("mousemove", mousemove)
+            .on("mouseout", mouseout);
+
 
         var linear = color;
 
         svg.append("g")
             .attr("class", "legendLinear")
-            .attr("transform", "translate("+ (-radius + 10) +", " + (radius + 10) +")");
-        
+            .attr("transform", "translate(" + (-radius + 10) + ", " + (radius + 10) + ")");
+
         var legendLinear = d3.legend.color()
             .shapeWidth(30)
             .orient('vertical')
@@ -72,4 +77,23 @@ function callGPie(chartID) {
         svg.select(".legendLinear")
             .call(legendLinear);
     };
-}
+    /*====================================================================
+           Mouse Functions   
+        ==================================================================*/
+    function mouseover(d) {
+        return tooltip
+            .style("display", null); // this removes the display none setting
+    };
+
+    function mousemove(d) {
+        console.log(d);
+        return tooltip
+            .style("top", (d3.event.pageY) - 80 + "px")
+            .style("left", (d3.event.pageX + 15) + "px")
+            .html("<p class='sans'><span class='tooltipHeader'>" + d3.format("%")(d.data.percentage) + " " + uppercase(d.data.gender) + "</span><br>Pop: " + d3.format(",")(d.data.total) + "</p>");
+    };
+
+    function mouseout(d) {
+        return tooltip.style("display", "none"); // this hides the tooltip
+    };
+};
