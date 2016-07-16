@@ -128,14 +128,14 @@ function callGenderRateLines(chartID) {
         /*=====================================================================
           Adding the Axes
  ======================================================================*/
-        // Chart Title
-        svg.append("text")
-            .attr("class", "chart-title")
-            .attr("x", margin.left)
-            .attr("y", 0)
-            .attr("dy", "1em")
-            .style("text-anchor", "start")
-            .text("Rates per 10,000 by Gender");
+//        // Chart Title
+//        svg.append("text")
+//            .attr("class", "chart-title")
+//            .attr("x", margin.left)
+//            .attr("y", 0)
+//            .attr("dy", "1em")
+//            .style("text-anchor", "start")
+//            .text("Rates per 10,000 by Gender");
 
         svg.append("g")
             .attr("class", "x axis")

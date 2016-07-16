@@ -124,14 +124,14 @@ function callRaceRateLines(chartID) {
         /*=====================================================================
           Adding the Axes
  ======================================================================*/
-        // Chart Title
-        svg.append("text")
-            .attr("class", "chart-title")
-            .attr("x", margin.left)
-            .attr("y", 0)
-            .attr("dy", "1em")
-            .style("text-anchor", "start")
-            .text("Rates per 10,000 by Race");
+//        // Chart Title
+//        svg.append("text")
+//            .attr("class", "chart-title")
+//            .attr("x", margin.left)
+//            .attr("y", 0)
+//            .attr("dy", "1em")
+//            .style("text-anchor", "start")
+//            .text("Rates per 10,000 by Race");
 
         svg.append("g")
             .attr("class", "x axis")
@@ -265,7 +265,7 @@ function callRaceRateLines(chartID) {
     function mouseoverFunc(d) {
         return tooltip
             .style("display", null); // this removes the display none setting
-    }
+    };
 
     function mousemoveFunc(d) {
 
@@ -283,13 +283,10 @@ function callRaceRateLines(chartID) {
             .style("top", (d3.event.pageY) - 80 + "px")
             .style("left", (d3.event.pageX + 15) + "px")
             .html("<p class='sans'><span class='tooltipHeader'>" + uppercase(d.race) + ", " + d.year + "</span><br>Rate: " + d3.format(".2f")(d.rate) + "</p>");
-    }
+    };
 
     function mouseoutFunc(d) {
         circle.attr("opacity", 0);
         return tooltip.style("display", "none"); // this hides the tooltip
-    }
-
-
-
-}
+    };
+};

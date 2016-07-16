@@ -1,9 +1,9 @@
 // ***********************************************
 // This is the function to call the small multiples
-// for late stage percentage by race
+// for late stage percentage by gender
 // *********************************************** 
 
-function callRaceMultsArea(chartID) {
+function callGenderMultsArea(chartID) {
     // Heavily simplified version of Jim Vallandingham's Coffee Script tutorial at The National
     // https://flowingdata.com/2014/10/15/linked-small-multiples/
     var height = 150;
@@ -15,10 +15,10 @@ function callRaceMultsArea(chartID) {
     };
 
     var color = d3.scale.ordinal()
-        .range(["#f8f7ce", "#ffe59a", "#ffca7d", "#f6755f", "#ffaf71"])
-        .domain(races);
+        .range(["#f6755f", "#ffaf71"])
+        .domain(genders);
 
-    var datasetByRace = null,
+    var datasetByGender = null,
         years = [],
         data = [],
         circle = null,
@@ -65,7 +65,7 @@ function callRaceMultsArea(chartID) {
         return d.year;
     };
     var yValue = function (d) {
-        return d.data[d.race + "_late_stage"];
+        return d.data[d.gender + "_late_stage"];
     };
 
     // Configure axis generators
@@ -99,10 +99,10 @@ function callRaceMultsArea(chartID) {
         var prenest = [];
 
         $.each(thisCountyDataset.years, function (key, data) {
-            races.forEach(function (d, i) { // races[] is an array defined in global-vars.js of the races from the dataset
+            genders.forEach(function (d, i) { // genders[] is an array defined in global-vars.js of the genders from the dataset
 
                 prenest.push({
-                    race: d,
+                    gender: d,
                     year: key,
                     late_stage: +data[d + "_late_stage"],
                     rate: +data[d],
@@ -113,11 +113,11 @@ function callRaceMultsArea(chartID) {
             years.push(key);
         });
 
-        datasetByRace = d3.nest().key(function (d) {
-            return d.race;
+        datasetByGender = d3.nest().key(function (d) {
+            return d.gender;
         }).entries(prenest);
 
-        datasetByRace.sort(function(a, b) {
+        datasetByGender.sort(function(a, b) {
             return (d3.mean(b.values, function (c) {
                 return c["late_stage"];
             })) - (d3.mean(a.values, function (c) {
@@ -126,7 +126,7 @@ function callRaceMultsArea(chartID) {
         });
 
 
-        d3.select(chartID).datum(datasetByRace).each(function (thisData) {
+        d3.select(chartID).datum(datasetByGender).each(function (thisData) {
             data = thisData;
             // compute domains
             yScale.domain([0, 1.0]);

@@ -39,7 +39,7 @@ function callGPie(chartID) {
             reformatted.push({
                 gender: d,
                 total: countyPop[d],
-                percentage: countyPop[d]/countyPop.total
+                percentage: countyPop[d] / countyPop.total
             });
         });
     };
@@ -58,6 +58,8 @@ function callGPie(chartID) {
             .style("fill", function (d) {
                 return color(d.data.gender);
             })
+            .attr("class", "arc")
+            .attr("opacity", .85)
             .on("mouseover", mouseover)
             .on("mousemove", mousemove)
             .on("mouseout", mouseout);

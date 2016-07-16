@@ -9,8 +9,8 @@ function callLateStageRange(chartID) {
     //Dimensions and padding
     var height = 300;
     var margin = {
-        top: 60,
-        right: 10,
+        top: 35,
+        right: 50,
         bottom: 50,
         left: 100
     };
@@ -28,7 +28,7 @@ function callLateStageRange(chartID) {
 
     //Set up scales
     var xScale = d3.time.scale()
-        .range([margin.left, width - margin.right - margin.left]);
+        .range([margin.left, width - margin.right]);
 
     var yScale = d3.scale.linear()
         .range([margin.top, height - margin.bottom]);
@@ -49,9 +49,30 @@ function callLateStageRange(chartID) {
         .tickFormat(function (d) {
             return d3.format("%")(d)
         })
-        .innerTickSize(-width + margin.right + margin.left + margin.left)
+        .innerTickSize(-width + margin.right + margin.left)
         .outerTickSize(0)
         .tickPadding(10);
+
+    //Configure area generator
+    var area = d3.svg.area()
+        .interpolate("cardinal")
+        .x(function (d) {
+            return xScale(dateFormat.parse(d.year));
+        })
+        .y0(height - margin.bottom)
+        .y1(function (d) {
+            return yScale(+d.percentage);
+        });
+
+    //Configure line generator
+    var line = d3.svg.line()
+        .x(function (d) {
+            return xScale(dateFormat.parse(d.year));
+        })
+        .y(function (d) {
+            return yScale(+d.percentage);
+        });
+
 
     //Create the empty SVG image
     var svg = d3.select(chartID)
@@ -91,7 +112,7 @@ function callLateStageRange(chartID) {
         });
 
         console.log(highest, lowest);
-    }
+    };
 
     draw();
 
@@ -143,20 +164,20 @@ function callLateStageRange(chartID) {
             Drawing
            ================================= */
 
-        // Chart Title
-        svg.append("text")
-            .attr("class", "chart-title")
-            .attr("x", margin.left)
-            .attr("y", 0)
-            .attr("dy", "1em")
-            .style("text-anchor", "start")
-            .text("Late Stage % for " + cancerType + " in " + county + " County");
+//        // Chart Title
+//        svg.append("text")
+//            .attr("class", "chart-title")
+//            .attr("x", margin.left)
+//            .attr("y", 0)
+//            .attr("dy", "1em")
+//            .style("text-anchor", "start")
+//            .text("Late Stage % for " + cancerType + " in " + county + " County");
 
         drawRange();
         drawAxes();
         drawCountyLine();
 
-    }
+    };
     /*====================================================================
        Mouse Functions   
     ==================================================================*/
@@ -174,12 +195,12 @@ function callLateStageRange(chartID) {
             .attr("y", y - 20)
             .attr("opacity", 1.0)
             .text(d3.format("%")(d.data.late_stage_percentage));
-    }
+    };
 
     function mouseoutFunc(d) {
         circle.attr("opacity", 0);
         chartText.attr("opacity", 0);
-    }
+    };
 
     /*====================================================================
        Draw Axes function
@@ -193,8 +214,8 @@ function callLateStageRange(chartID) {
             .call(xAxis)
             .append("text")
             .attr("class", "label")
-            .attr("x", width - margin.left - margin.right)
-            .attr("y", margin.top - margin.bottom + 10)
+            .attr("x", width - margin.right)
+            .attr("y", 20)
             .attr("dy", "2em")
             .style("text-anchor", "end")
             .attr("class", "label")
@@ -213,33 +234,13 @@ function callLateStageRange(chartID) {
             .style("text-anchor", "start")
             .attr("class", "label")
             .text("Late Stage Percentage (%)");
-    }
+    };
 
     /*====================================================================
        Draw Area Range function
     ======================================================================*/
 
     function drawRange() {
-
-        //Configure area generator
-        var area = d3.svg.area()
-            .x(function (d) {
-                return xScale(dateFormat.parse(d.year));
-            })
-            .y0(height - margin.bottom)
-            .y1(function (d) {
-                return yScale(+d.percentage);
-            });
-
-        //Configure line generator
-        var line = d3.svg.line()
-            .x(function (d) {
-                return xScale(dateFormat.parse(d.year));
-            })
-            .y(function (d) {
-                return yScale(+d.percentage);
-            });
-
         //Make a group for each count type
         var groups = svg.selectAll("g.graph")
             .data(areaData)
@@ -284,8 +285,7 @@ function callLateStageRange(chartID) {
             .attr("d", function (d) {
                 return line(d.data);
             });
-
-    }
+    };
 
     /*====================================================================
        Draw County Line function
@@ -363,7 +363,7 @@ function callLateStageRange(chartID) {
             .y(function (d) {
                 return yScale(d.data.late_stage_percentage);
             })
-            .clipExtent([[margin.left, margin.top], [width - margin.left, height - margin.bottom]]);
+            .clipExtent([[margin.left, margin.top], [width, height - margin.bottom]]);
 
         //Create the Voronoi grid
         voronoiGroup.selectAll("path")
@@ -387,35 +387,5 @@ function callLateStageRange(chartID) {
             .style("pointer-events", "all")
             .on("mouseover", mouseoverFunc)
             .on("mouseout", mouseoutFunc);
-    }
-
-    /*====================================================================
-       Push High/Lows
-    ======================================================================*/
-    function pushHighLow(year) {
-        d3.json('http://scanportal.org/json/ranking/county/' + cancerType + '/' + year + '/' + year + '/66/asc', function (error, json) {
-            if (error) {
-                console.log("error: ", error)
-            };
-
-            var end = json.length - 1;
-
-            highest.push({
-                year: "" + year,
-                bound: "highest",
-                county: "" + json[end].county,
-                cancer: "" + json[end].cancer_type,
-                percentage: +json[end].late_stage_percentage
-            });
-
-            lowest.push({
-                year: "" + year,
-                bound: "lowest",
-                county: "" + json[0].county,
-                cancer: "" + json[0].cancer_type,
-                percentage: +json[0].late_stage_percentage
-            });
-        });
-    }
-
-}
+    };
+};

@@ -1,7 +1,7 @@
-var countyNumber = 367;
+var countyNumber = 361;
 var startYear = 2004;
 var endYear = 2013;
-var cancerType = 10;
+var cancerType = 5;
 
 
 /*=====================================================================
@@ -18,6 +18,7 @@ function loaded(error, allCounties, allZips, thisCounty, countyNameMap) { // loa
     // formatting
     setupData(allCountiesDataset);
     // call the function(s) - unless we have multiple pages or triggers, just call all of the chart functions
+    getWidth();
     callAllCharts();
 }
 /*=====================================================================
@@ -60,14 +61,18 @@ function setupData(d) {
 
 function callAllCharts() {
     callCountyRanking("#countyBarChart");
-    callZipCodeRankings("#zipcodeBarChart");
+    callZipCodeLateStageRankings("#zipcodeLSBarChart");
+    callZipCodeRateRankings("#zipcodeRATEBarChart");
     callLateStageRange("#lateStageRangeChart");
     callCountArea("#countAreaChart");
-    callRPie("#racePieChart");
+    callRaceBubbles("#raceBubbleChart");
+    //    callRaceStreamgraph("#raceStreamgraph");
+    //    callRaceStackedArea("#raceStackedArea");
     callGPie("#genderPieChart");
     callRaceRateLines("#raceRateLineChart");
     callRaceMultsArea("#raceSmallMultiplesChart");
     callGenderRateLines("#genderRateLineChart");
+    callGenderMultsArea("#genderSmallMultiplesChart");
     callAgeScatter("#zipcodeScatterChart");
 }
 
@@ -83,3 +88,17 @@ function setSelectionOptions() {
     });
 
 }
+
+/*=====================================================================
+ window resize
+=====================================================================*/
+
+$(window).resize(function () {
+    clearAllsvg();
+    getWidth();
+    callAllCharts();
+});
+
+function clearAllsvg() {
+    d3.selectAll('svg').remove();
+};

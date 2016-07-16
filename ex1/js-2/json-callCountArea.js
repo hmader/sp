@@ -8,8 +8,8 @@ function callCountArea(chartID) {
     //Dimensions and padding
     var height = 300;
     var margin = {
-        top: 60,
-        right: 10,
+        top: 35,
+        right: 50,
         bottom: 50,
         left: 90
     };
@@ -32,7 +32,7 @@ function callCountArea(chartID) {
 
     //Set up scales
     var xScale = d3.time.scale()
-        .range([margin.left, width - margin.right - margin.left]);
+        .range([margin.left, width - margin.right]);
 
     var yScale = d3.scale.linear()
         .range([margin.top, height - margin.bottom]);
@@ -50,13 +50,14 @@ function callCountArea(chartID) {
     var yAxis = d3.svg.axis()
         .scale(yScale)
         .orient("left")
-        .innerTickSize(-width + margin.right + margin.left + margin.left)
+        .innerTickSize(-width + margin.right + margin.left)
         .outerTickSize(0)
         .tickPadding(10);
 
 
     //Configure area generator
     var area = d3.svg.area()
+        .interpolate("cardinal")
         .x(function (d) {
             return xScale(dateFormat.parse(d.year));
         })
@@ -66,6 +67,7 @@ function callCountArea(chartID) {
         });
 
     var line = d3.svg.line()
+        .interpolate("cardinal")
         .x(function (d) {
             return xScale(dateFormat.parse(d.year));
         })
@@ -150,24 +152,14 @@ function callCountArea(chartID) {
         /* ================================= 
             Drawing
            ================================= */
-
-        // Create the line between the two circles - x and y values set later
-        bindingLine = svg.append("line")
-            .attr("class", "binding-line")
-            .attr("opacity", 0)
-            .attr("stroke-width", 1)
-            .attr("stroke", "#f1735f")
-            .style("stroke-dasharray", ("5, 5"))
-            .style("pointer-events", "none");
-
         //Axes
-            svg.append("g")
+        svg.append("g")
             .attr("class", "x axis")
             .attr("transform", "translate(0," + (height - margin.bottom) + ")")
             .call(xAxis)
             .append("text")
             .attr("class", "label")
-            .attr("x", width - margin.left - margin.right)
+            .attr("x", width - margin.right)
             .attr("y", 20)
             .attr("dy", "2em")
             .style("text-anchor", "end")
@@ -188,14 +180,23 @@ function callCountArea(chartID) {
             .attr("class", "label")
             .text("Rates per 10,000");
 
-        //Title
-        svg.append("text")
-            .attr("class", "chart-title")
-            .attr("x", margin.left)
-            .attr("y", 0)
-            .attr("dy", "1em")
-            .style("text-anchor", "start")
-            .text("Total and Late Stage Rates for " + cancerType + " in " + county + " County");
+//        //Title
+//        svg.append("text")
+//            .attr("class", "chart-title")
+//            .attr("x", margin.left)
+//            .attr("y", 0)
+//            .attr("dy", "1em")
+//            .style("text-anchor", "start")
+//            .text("Total and Late Stage Rates for " + cancerType + " in " + county + " County");
+
+        // Create the line between the two circles - x and y values set later
+        bindingLine = svg.append("line")
+            .attr("class", "binding-line")
+            .attr("opacity", 0)
+            .attr("stroke-width", 1)
+            .attr("stroke", "#f1735f")
+            .style("stroke-dasharray", ("5, 5"))
+            .style("pointer-events", "none");
 
         //Make a group for each count type
         var groups = svg.selectAll("g.graph")
@@ -241,16 +242,14 @@ function callCountArea(chartID) {
             .attr("class", "background")
             .style("pointer-events", "all")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-            .attr("width", width - margin.left - margin.right - 50)
+            .attr("width", width - margin.right - 50)
             .attr("fill", "#fff")
             .attr("opacity", 0)
             .attr("height", height)
             .on("mouseover", mouseoverFunc)
             .on("mousemove", mousemoveFunc)
             .on("mouseout", mouseoutFunc);
-
-
-    }
+    };
 
     /*====================================================================
          Mouse Functions
@@ -266,7 +265,7 @@ function callCountArea(chartID) {
         return tooltip
             .style("display", null) // this removes the display none setting
             .html("<p class='sans'><span class='tooltipHeader'>" + year + "</span></p>");
-    }
+    };
 
     function mousemoveFunc(d) {
         //    console.log("mousemove");
@@ -296,15 +295,6 @@ function callCountArea(chartID) {
                 return yScale(+c.counts[index]["count"]);
             });
 
-        //    circleText
-        //        .attr("x", xScale(date) + 10)
-        //        .attr("y", function (c) {
-        //            return yScale(+c.counts[index]["count"]) - 10;
-        //        })
-        //        .text(function (c) {
-        //            return d3.format(".1f")(+c.counts[index]["count"]);
-        //        });
-
         bindingLine
             .attr("x1", xScale(date))
             .attr("y1", yScale(0))
@@ -317,7 +307,7 @@ function callCountArea(chartID) {
             .style("top", (d3.event.pageY) - 80 + "px")
             .style("left", (d3.event.pageX + 15) + "px")
             .html("<p class='sans'><span class='tooltipHeader'>" + year + "</span><br>Total: " + tooltipTotal + "<br>Late Stage: " + tooltipLateStage + "</p>");
-    }
+    };
 
     function mouseoutFunc(d) {
         //    console.log("mouseout");
@@ -325,6 +315,6 @@ function callCountArea(chartID) {
         circle.attr("opacity", 0);
         //    circleText.attr("opacity", 0);
         return tooltip.style("display", "none"); // this hides the tooltip
-    }
+    };
 
-}
+};

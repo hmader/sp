@@ -4,8 +4,6 @@ function callRPie(chartID) {
         height = 360,
         radius = Math.min(2 * width / 3, 2 * height / 3) / 2;
 
-    var population = ["asian", "black", "hispanic", "native_american", "white"];
-
     var reformatted = [];
 
     var color = d3.scale.ordinal()
@@ -94,7 +92,7 @@ function callRPie(chartID) {
         return tooltip
             .style("top", (d3.event.pageY) - 80 + "px")
             .style("left", (d3.event.pageX + 15) + "px")
-            .html("<p class='sans'><span class='tooltipHeader'>" + d3.format("%")(d.data.percentage) + " " + uppercase(d.data.race) + "</span><br>Pop: " + d3.format(",")(d.data.total) + "</p>");
+            .html("<p class='sans'><span class='tooltipHeader'>" + uppercase(d.data.race) + "</span><br>Pop: " + d3.format(",")(d.data.total) + "</p>");
     };
 
     function mouseout(d) {

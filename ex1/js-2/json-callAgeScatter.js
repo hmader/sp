@@ -7,13 +7,14 @@ function callAgeScatter(chartID) {
         left: 100
     };
 
-    var nonNullZipcodes;
+    var nonNullZipcodes = [];
+    var filtered = [];
     var dotRadius = 3.5;
     var circle;
+    var nest;
 
     var xScale = d3.scale.linear()
         .range([margin.left, width - margin.left - margin.right]); //--- range is what we are mapping TO, so we want it to be the chart area
-
 
     var yScale = d3.scale.linear()
         .range([height - margin.bottom - margin.top, margin.top]); //--- range is what we are mapping TO, so we want it to be the chart area
@@ -39,17 +40,24 @@ function callAgeScatter(chartID) {
         .append("svg")
         .attr("width", width)
         .attr("height", height);
+    /*====================================================================
+           Selection dropdown 
+        ==================================================================*/
+
+    var selections = d3.select("select#zipcodeYears")
+        .on("change", draw);
+    years.forEach(function (d) {
+        $("select#zipcodeYears").append("<option>" + d + "</option>");
+    });
+    /*====================================================================
+       Draw 
+    ==================================================================*/
+    setupData();
     draw();
 
-    function draw() {
-
-        var nonNullZipcodes = zipcodesDataset.filter(function (d) {
+    function setupData() {
+        nonNullZipcodes = zipcodesDataset.filter(function (d) {
             return d.total != null;
-        });
-        
-        
-        var filtered = nonNullZipcodes.filter(function (d) {
-            return d.year == 2013;
         });
 
         xScale.domain([0, d3.max(nonNullZipcodes, function (d) {
@@ -60,10 +68,27 @@ function callAgeScatter(chartID) {
             return +d.total;
         })]);
 
-
         colorScale.domain([0, d3.max(nonNullZipcodes, function (d) {
             return +d.total;
         })]);
+        
+//        var prenest = [];
+//        
+//        nonNullZipcodes.forEach(function(d) {
+//           prenest.push({
+//           age_diagnosis: d.age_diagnosis,
+//               county: d.county,
+//               total: d.total,
+//               late_stage_percentage: d.late_stage_percentage,
+//               year: d.year
+//           }); 
+//        });
+//        
+//        nest = d3.nest().key(function(d) {
+//         return d.county;   
+//        }).entries(prenest);
+//        
+//        console.log("nest", nest);
 
         /// axes
         // fix these translates so they use your margin and height width as needed
@@ -94,22 +119,50 @@ function callAgeScatter(chartID) {
             .attr("class", "label")
             .text("Total Rate");
 
-        // scatter plot
-        var circles = svg.selectAll("circle")
-            .data(nonNullZipcodes)
-            .enter()
-            .append("circle");
+console.log("ZIP", zipcodesDataset,nonNullZipcodes);
+    };
+    /*=====================================================================
+                 draw()
+======================================================================*/
 
-        circles.attr("class", "dots");
-        // class to the circles - ".dots".
+    function draw() {
 
-        circles.attr("cx", function (d) {
+        svg.selectAll("g.voronoiGroup").remove();
+        svg.selectAll("circle.highlight").remove();
+
+        filtered = nonNullZipcodes.filter(function (d) {
+            if (selections.property("value") == "All Years") {
+                return d.year != null;
+            } else {
+                return d.year == selections.property("value");
+            }
+        });
+
+        var circles = svg.selectAll("circle.dots")
+            .data(filtered);
+
+        circles.exit()
+            .transition()
+            .duration(300)
+            .ease("exp")
+            .attr("r", 0)
+            .remove();
+
+        circles.enter()
+            .append("circle")
+            .attr("class", "dots");
+
+        circles
+            .transition()
+            .duration(300)
+            .ease("quad")
+            .attr("cx", function (d) {
                 return xScale(+d.age_diagnosis);
             })
             .attr("cy", function (d) {
                 return yScale(+d.total);
             })
-            .attr("r", dotRadius) // you might want to increase your dotRadius
+            .attr("r", dotRadius)
             .attr("fill", function (d) {
                 if (!isNaN(+d.age_diagnosis) && !isNaN(+d.total)) {
                     return colorScale(+d.total);
@@ -119,24 +172,36 @@ function callAgeScatter(chartID) {
             })
             .attr("opacity", ".6");
 
-        // Circles to show the values for the year on hover
+        // Circle to show the values for the year on hover
         circle = svg.append("circle")
+            .attr("class", "highlight")
             .attr("r", 4)
             .attr("opacity", 0)
             .attr("stroke-width", 2.5)
             .attr("fill", "#fff")
             .style("pointer-events", "none");
+
         /*=====================================================================
                   Voronoi
 ======================================================================*/
         // Draw the circles for voronoi
-        svg.selectAll("circle.voronoi")
-            .data(nonNullZipcodes)
-            .enter()
+        var voronoiCir = svg.selectAll("circle.voronoi")
+            .data(filtered);
+
+        voronoiCir.enter()
             .append("circle")
-            .attr("class", function (d) {
-                return "voronoi " + d.zipcode;
-            })
+            .attr("class", "voronoi");
+
+        voronoiCir.exit()
+            .transition()
+            .duration(300)
+            .ease("exp")
+            .attr("r", 0)
+            .remove();
+
+        voronoiCir.transition()
+            .duration(300)
+            .ease("quad")
             .attr("r", 1)
             .style("opacity", 0)
             .attr("stroke", "none")
@@ -167,7 +232,7 @@ function callAgeScatter(chartID) {
 
         //Create the Voronoi grid
         voronoiGroup.selectAll("path")
-            .data(voronoi(nonNullZipcodes)) //Use vononoi() with your dataset inside
+            .data(voronoi(filtered)) //Use vononoi() with your dataset inside
             .enter().append("path")
             .filter(function (d) {
                 return d !== undefined;
@@ -180,7 +245,7 @@ function callAgeScatter(chartID) {
             })
             //Give each cell a unique class where the unique part corresponds to the circle classes
             .attr("class", function (d, i) {
-                return "voronoi " + d.zipcode;
+                return "voronoi " + d.county;
             })
             //            .style("stroke", "#2074A0") //If you want to look at the cells
             .style("fill", "none")
@@ -188,19 +253,19 @@ function callAgeScatter(chartID) {
             .on("mouseover", mouseoverFunc)
             .on("mousemove", mousemoveFunc)
             .on("mouseout", mouseoutFunc);
-    }
+    };
 
     /*====================================================================
        Mouse Functions   
     ==================================================================*/
 
     function mouseoverFunc(d) {
+        console.log(d);
         return tooltip
             .style("display", null); // this removes the display none setting
-    }
+    };
 
     function mousemoveFunc(d) {
-
         var x = xScale(d.age_diagnosis);
         var y = yScale(d.total);
 
@@ -219,12 +284,10 @@ function callAgeScatter(chartID) {
             .style("top", (d3.event.pageY) - 80 + "px")
             .style("left", (d3.event.pageX + 15) + "px")
             .html("<p class='sans'><span class='tooltipHeader'>Zipcode: " + d.county + "</span><br>Year: " + d.year + "<br>Age Diagnosis: " + d.age_diagnosis + "<br>Rate: " + d3.format(".2f")(d.total) + "</p>");
-    }
+    };
 
     function mouseoutFunc(d) {
         circle.attr("opacity", 0);
         return tooltip.style("display", "none"); // this hides the tooltip
-    }
-
-
-}
+    };
+};
