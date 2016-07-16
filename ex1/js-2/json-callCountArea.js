@@ -141,8 +141,8 @@ function callCountArea(chartID) {
 
         // domain is 0 - highest of current set -- temporary, must make for highest total of all counties
         yScale.domain([
-           d3.max(datasetYears, function (c) {
-                return c.data.total_ratio;
+           d3.max(allCountiesDataset, function (c) {
+                return c.total_ratio;
             })
                 ,
                     0
@@ -178,16 +178,16 @@ function callCountArea(chartID) {
             .attr("dy", "1em")
             .style("text-anchor", "start")
             .attr("class", "label")
-            .text("Rates per 10,000");
+            .text("Rates per 100,000");
 
-//        //Title
-//        svg.append("text")
-//            .attr("class", "chart-title")
-//            .attr("x", margin.left)
-//            .attr("y", 0)
-//            .attr("dy", "1em")
-//            .style("text-anchor", "start")
-//            .text("Total and Late Stage Rates for " + cancerType + " in " + county + " County");
+        //        //Title
+        //        svg.append("text")
+        //            .attr("class", "chart-title")
+        //            .attr("x", margin.left)
+        //            .attr("y", 0)
+        //            .attr("dy", "1em")
+        //            .style("text-anchor", "start")
+        //            .text("Total and Late Stage Rates for " + cancerType + " in " + county + " County");
 
         // Create the line between the two circles - x and y values set later
         bindingLine = svg.append("line")

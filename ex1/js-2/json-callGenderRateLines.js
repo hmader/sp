@@ -162,7 +162,7 @@ function callGenderRateLines(chartID) {
             .attr("dy", "1em")
             .style("text-anchor", "start")
             .attr("class", "label")
-            .text("Rate per 10,000");
+            .text("Rate per 100,000");
 
         /*=====================================================================
                   Lines

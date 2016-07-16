@@ -1,4 +1,4 @@
-var countyNumber = 361;
+var countyNumber = 369;
 var startYear = 2004;
 var endYear = 2013;
 var cancerType = 5;
@@ -48,6 +48,7 @@ function setupData(d) {
         return d.year;
     }).entries(d);
 
+    console.log("ALL", allCountiesDataset);
     console.log("NBY", nestByYear);
     console.log("NBC", nestByCounty);
     console.log("MBC", mapByCounty);

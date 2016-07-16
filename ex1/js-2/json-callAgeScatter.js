@@ -118,8 +118,6 @@ function callAgeScatter(chartID) {
             .style("text-anchor", "start")
             .attr("class", "label")
             .text("Total Rate");
-
-console.log("ZIP", zipcodesDataset,nonNullZipcodes);
     };
     /*=====================================================================
                  draw()
@@ -260,7 +258,6 @@ console.log("ZIP", zipcodesDataset,nonNullZipcodes);
     ==================================================================*/
 
     function mouseoverFunc(d) {
-        console.log(d);
         return tooltip
             .style("display", null); // this removes the display none setting
     };
