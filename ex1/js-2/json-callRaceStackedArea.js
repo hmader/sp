@@ -5,7 +5,7 @@
 
 // based off of http://bl.ocks.org/WillTurman/4631136
 function callRaceStackedArea(chartID) {
-    var height = 350;
+    var height = 250;
     var margin = {
         top: 35,
         right: 15,

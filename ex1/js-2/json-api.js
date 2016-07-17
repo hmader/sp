@@ -1,4 +1,4 @@
-var countyNumber = 369;
+var countyNumber = 367;
 var startYear = 2004;
 var endYear = 2013;
 var cancerType = 5;

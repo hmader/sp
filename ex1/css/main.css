@@ -94,6 +94,11 @@ button {
     color: #666;
 }
 
+button:hover,
+selected:hover {
+ cursor: pointer;
+}
+
 button.selected {
     background-color: #666;
     color: #fff;

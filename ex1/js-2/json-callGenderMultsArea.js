@@ -125,7 +125,6 @@ function callGenderMultsArea(chartID) {
             }));
         });
 
-
         d3.select(chartID).datum(datasetByGender).each(function (thisData) {
             data = thisData;
             // compute domains

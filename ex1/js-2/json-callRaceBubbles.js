@@ -43,12 +43,12 @@ function callRaceBubbles(chartID) {
             }),
         0
     ]);
-        
+
         reformatted.sort(function (a, b) {
-            return a.total - b.total;
+            return b.total - a.total;
         });
     };
-    
+
     function draw() {
 
         var mults = d3.select(chartID).selectAll("svg")
@@ -61,42 +61,93 @@ function callRaceBubbles(chartID) {
 
                 var svg = d3.select(this);
 
-                console.log("Data", d);
+                //                svg.append("rect")
+                //                    .attr("class", "background")
+                //                    .style("pointer-events", "all")
+                //                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+                //                    .attr("width", width - margin.right - margin.left)
+                //                    .attr("fill", "#fff")
+                //                    .attr("opacity", 0)
+                //                    .attr("height", height - margin.top - margin.bottom)
+                //                    .on("mouseover", mouseover)
+                //                    .on("mousemove", mousemove)
+                //                    .on("mouseout", mouseout);
+
 
                 var g = svg.append("g")
                     .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")")
 
                 g.append("circle")
                     .attr("class", "bubble")
+                    //                    .style("pointer-events", "none")
                     .attr("r", function () {
                         return circleScale(d.total) / 2;
                     })
                     .attr("fill", function () {
                         return color(d.race);
                     });
-                
+//                    .on("mouseover", mouseover)
+//                    .on("mousemove", mousemove)
+//                    .on("mouseout", mouseout);
+
                 g.append("text")
                     .attr("class", "subtitle")
                     .attr("x", 0)
-                    .attr("y", -height/2 + 25)
+                    .attr("y", -height / 2 + 25)
                     .attr("dy", "-1em")
                     .style("text-anchor", "middle")
+                    .style("font-weight", "bold")
                     .text(function () {
                         return uppercase(d.race);
                     });
-                
+
                 g.append("text")
                     .attr("class", "subtitle")
+                .style("pointer-events", "none")
                     .attr("x", 0)
-                    .attr("y", height/2 + 5)
-                    .attr("dy", "-1em")
+                    .attr("y", height/2 - 5)
                     .style("text-anchor", "middle")
                     .text(function () {
                         return d3.format(",")(d.total);
                     });
 
-
             }); // end multiple
 
-    }; // end draw 
+    }; // end draw
+    /*====================================================================
+       Mouse Functions   
+==================================================================*/
+    function mouseover(d) {
+        var circ = d3.select(this);
+        circ.attr("stroke", function (d) {
+                return color(d.race);
+            })
+            .attr("stroke-width", 5)
+            .attr("fill", "#fff");
+        //        return tooltip
+        //            .style("display", null); // this removes the display none setting
+    };
+
+    function mousemove(d) {
+        var circ = d3.select(this);
+        circ.attr("stroke", function (d) {
+                return color(d.race);
+            })
+            .attr("stroke-width", 5)
+            .attr("fill", "#fff");
+        //        return tooltip
+        //            .style("top", (d3.event.pageY) - 50 + "px")
+        //            .style("left", (d3.event.pageX + 15) + "px")
+        //            .html("<p class='sans'><span class='tooltipHeader'>" + uppercase(d.race) + "</span>" + d3.format(",")(d.total) + "</p>");
+    };
+
+    function mouseout(d) {
+        var circ = d3.select(this);
+        circ.attr("stroke", "none")
+            .attr("stroke-width", 0)
+            .attr("fill", function (d) {
+                return color(d.race);
+            });
+        //        return tooltip.style("display", "none"); // this hides the tooltip
+    };
 };

@@ -103,6 +103,8 @@ function callZipCodeLateStageRankings(chartID) {
         xScale.domain([0, d3.max(averages, function (d) {
             return d["mean"];
         })]);
+        
+        console.log("Ranked", averages, ranked);
     };
     /*====================================================================
      draw()
