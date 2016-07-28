@@ -52,11 +52,8 @@ function setupData(d) {
     }).entries(d);
 
     console.log("ALL", allCountiesDataset);
-    console.log("NBY", nestByYear);
     console.log("NBC", nestByCounty);
-    console.log("MBC", mapByCounty);
     console.log("THIS C", thisCountyDataset);
-    console.log("ZIPS", zipcodesDataset);
 }
 
 /*=====================================================================
