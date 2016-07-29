@@ -1,7 +1,7 @@
 var countyNumber = 360;
 var startYear = 2004;
 var endYear = 2013;
-var cancerType = 50;
+var cancerType = 54;
 
 
 /*=====================================================================
@@ -52,8 +52,11 @@ function setupData(d) {
     }).entries(d);
 
     console.log("ALL", allCountiesDataset);
+    console.log("NBY", nestByYear);
     console.log("NBC", nestByCounty);
+    console.log("MBC", mapByCounty);
     console.log("THIS C", thisCountyDataset);
+    console.log("ZIPS", zipcodesDataset);
 }
 
 /*=====================================================================
@@ -61,7 +64,20 @@ function setupData(d) {
 =====================================================================*/
 
 function callAllCharts() {
+    callCountyRanking("#countyBarChart");
+    callZipCodeLateStageRankings("#zipcodeLSBarChart");
+    callZipCodeRateRankings("#zipcodeRATEBarChart");
+    callLateStageRange("#lateStageRangeChart");
     callCountArea("#countAreaChart");
+    callRaceBubbles("#raceBubbleChart");
+    //    callRaceStreamgraph("#raceStreamgraph");
+    //    callRaceStackedArea("#raceStackedArea");
+    callGPie("#genderPieChart");
+//    callRaceRateLines("#raceRateLineChart");
+    callRaceMultsArea("#raceSmallMultiplesChart");
+//    callGenderRateLines("#genderRateLineChart");
+    callGenderMultsArea("#genderSmallMultiplesChart");
+    callAgeScatter("#zipcodeScatterChart");
 }
 
 /*=====================================================================
