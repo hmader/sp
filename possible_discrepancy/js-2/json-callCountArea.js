@@ -46,7 +46,7 @@ function callCountArea(chartID) {
             return dateFormat(d);
         })
         .tickPadding(10);
-
+    
     var yAxis = d3.svg.axis()
         .scale(yScale)
         .orient("left")
@@ -57,7 +57,6 @@ function callCountArea(chartID) {
 
     //Configure area generator
     var area = d3.svg.area()
-//        .interpolate("cardinal")
         .x(function (d) {
             return xScale(dateFormat.parse(d.year));
         })
@@ -66,8 +65,8 @@ function callCountArea(chartID) {
             return yScale(+d.count);
         });
 
+    //Configure line generator
     var line = d3.svg.line()
-//        .interpolate("cardinal")
         .x(function (d) {
             return xScale(dateFormat.parse(d.year));
         })
@@ -81,11 +80,15 @@ function callCountArea(chartID) {
         .attr("width", width)
         .attr("height", height);
 
+    setupData();
     draw();
 
-    function draw() {
+    /*====================================================================
+    
+    setupData()
+    ======================================================================*/
 
-        //        console.log("Area Chart JSON data: ", json);
+    function setupData() {
 
         var county = thisCountyDataset.county.name;
         var cancerType = thisCountyDataset.cancer.name;
@@ -100,16 +103,15 @@ function callCountArea(chartID) {
             years.push(key);
         });
 
-                console.log("DATASETYEARS", datasetYears);
-        //        console.log("YEARS", years);
+        console.log("DATASETYEARS", datasetYears);
 
         datasetYears.forEach(function (d, i) {
 
-            //Add a new object to the new emissions data array
+            //Add a new object to the new emissions data array so we have a dataset for the "total ratio" area and the "late stage ratio" chart
             total.push({
                 county: county, // county name
                 cancer: cancerType,
-                counting: "total", // what this is a count of
+                counting: "total", // this data is
                 year: d.year, // year
                 count: d.data.total_ratio // the count
             });
@@ -117,13 +119,14 @@ function callCountArea(chartID) {
             lateStage.push({
                 county: county,
                 cancer: cancerType,
-                counting: "late_stage", // what this is a count of
+                counting: "late_stage", // this data is
                 year: d.year, // year
                 count: d.data.total_ratio * d.data.late_stage_percentage // the count
             });
 
         });
 
+        // push both to datasetByCountType
         datasetByCountType.push({
             Counting: "Total",
             counts: total
@@ -132,14 +135,14 @@ function callCountArea(chartID) {
             counts: lateStage
         });
 
-//        console.log("DATASETBYCOUNTTYPE", datasetByCountType);
+        console.log("DATASETBYCOUNTTYPE", datasetByCountType);
 
         //Set scale domains 
         xScale.domain(d3.extent(years, function (d) {
             return dateFormat.parse(d);
         }));
 
-        // domain is 0 - highest of current set -- temporary, must make for highest total of all counties
+        // domain is 0 - highest total of all counties (allCountiesDataset)
         yScale.domain([
            d3.max(allCountiesDataset, function (c) {
                 return c.total_ratio;
@@ -147,6 +150,26 @@ function callCountArea(chartID) {
                 ,
                     0
             ]);
+
+        // this is just printing out specific data from the allCountiesDataset, which is what we use for the y domain
+        allCountiesDataset.forEach(function (d) {
+            console.log("year: ", d.year, "total_ratio: ", d.total_ratio, "total: ", d.total)
+        });
+
+        console.log("c.total_ratio: ", d3.max(allCountiesDataset, function (c) {
+            return c.total_ratio;
+        }));
+
+        console.log("c.total: ", d3.max(allCountiesDataset, function (c) {
+            return c.total;
+        }));
+        // end console checks
+    }
+    /*====================================================================
+    
+    draw()
+    ======================================================================*/
+    function draw() {
 
         /* ================================= 
             Drawing
@@ -177,18 +200,8 @@ function callCountArea(chartID) {
             .attr("dy", "1em")
             .style("text-anchor", "start")
             .attr("class", "label")
-            .text("Rates per 100,000");
 
-        //        //Title
-        //        svg.append("text")
-        //            .attr("class", "chart-title")
-        //            .attr("x", margin.left)
-        //            .attr("y", 0)
-        //            .attr("dy", "1em")
-        //            .style("text-anchor", "start")
-        //            .text("Total and Late Stage Rates for " + cancerType + " in " + county + " County");
-
-        // Create the line between the two circles - x and y values set later
+        // Create the line between the two circles - x and y values set later, on hover
         bindingLine = svg.append("line")
             .attr("class", "binding-line")
             .attr("opacity", 0)
@@ -197,7 +210,7 @@ function callCountArea(chartID) {
             .style("stroke-dasharray", ("5, 5"))
             .style("pointer-events", "none");
 
-        //Make a group for each count type
+        //Make a group for each count type using datasetByCountyType
         var groups = svg.selectAll("g.graph")
             .data(datasetByCountType)
             .enter()
@@ -255,10 +268,8 @@ function callCountArea(chartID) {
     ======================================================================*/
 
     function mouseoverFunc(d) {
-        //        console.log("mouseover");
         circle.attr("opacity", 1.0);
         bindingLine.attr("opacity", 1.0);
-        //    circleText.attr("opacity", 1.0);
 
         var year = xScale.invert(d3.mouse(this)[0]).getFullYear();
         return tooltip
@@ -267,16 +278,13 @@ function callCountArea(chartID) {
     };
 
     function mousemoveFunc(d) {
-        //    console.log("mousemove");
         var date, index, year;
         var y2;
         var tooltipTotal;
         var tooltipLateStage;
         year = xScale.invert(d3.mouse(this)[0] + margin.left).getFullYear();
         date = dateFormat.parse('' + year);
-        //    console.log("YEAR", year, "DATE", date);
         index = 0;
-        //    console.log("events", window.event, d3.event);
         circle
             .attr("cx", xScale(date))
             .attr("cy", function (c) {
@@ -284,7 +292,6 @@ function callCountArea(chartID) {
                 if (c.Counting == "Total") {
                     y2 = yScale(+c.counts[index]["count"]);
                     tooltipTotal = d3.format(".2f")(+c.counts[index]["count"]);
-                    //    console.log("Y2", y2, +c.counts[index]["count"]);
                 } else if (c.Counting == "Late_Stage") {
                     tooltipLateStage = d3.format(".2f")(+c.counts[index]["count"]);
                 } else {
@@ -301,18 +308,14 @@ function callCountArea(chartID) {
             .attr("y2", y2);
 
         return tooltip
-            //            .style("top", y2 + 55 + "px")
-            //            .style("left", xScale(date) + 15 + "px")
             .style("top", (d3.event.pageY) - 80 + "px")
             .style("left", (d3.event.pageX + 15) + "px")
             .html("<p class='sans'><span class='tooltipHeader'>" + year + "</span><br>Total: " + tooltipTotal + "<br>Late Stage: " + tooltipLateStage + "</p>");
     };
 
     function mouseoutFunc(d) {
-        //    console.log("mouseout");
         bindingLine.attr("opacity", 0);
         circle.attr("opacity", 0);
-        //    circleText.attr("opacity", 0);
         return tooltip.style("display", "none"); // this hides the tooltip
     };
 
