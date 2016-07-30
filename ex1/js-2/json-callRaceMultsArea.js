@@ -226,7 +226,7 @@ function callRaceMultsArea(chartID) {
                 .style("text-anchor", "start")
             .style("fill", "#666")
                 .text(function (d) {
-                    return uppercase(d.key) + " Late Stage %";
+                    return uppercase(d.key);
                 });
             // end axes
 
