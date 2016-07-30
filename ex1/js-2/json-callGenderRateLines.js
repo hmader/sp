@@ -32,6 +32,7 @@ function callGenderRateLines(chartID) {
     //Configure line generator
     // each line dataset must have a d.year and a d.rate for this to work.
     var line = d3.svg.line()
+//    .interpolate("cardinal")
         .x(function (d) {
             return xScale(dateFormat.parse(d.year));
         })

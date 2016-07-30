@@ -7,7 +7,7 @@
 function callLateStageRange(chartID) {
 
     //Dimensions and padding
-    var height = 300;
+    var height = standardHeight;
     var margin = {
         top: 35,
         right: 50,
@@ -55,7 +55,7 @@ function callLateStageRange(chartID) {
 
     //Configure area generator
     var area = d3.svg.area()
-        .interpolate("cardinal")
+//        .interpolate("cardinal")
         .x(function (d) {
             return xScale(dateFormat.parse(d.year));
         })
@@ -66,6 +66,7 @@ function callLateStageRange(chartID) {
 
     //Configure line generator
     var line = d3.svg.line()
+//        .interpolate("cardinal")
         .x(function (d) {
             return xScale(dateFormat.parse(d.year));
         })
@@ -79,10 +80,23 @@ function callLateStageRange(chartID) {
         .append("svg")
         .attr("width", width)
         .attr("height", height);
+    
+    // check to see if the dataset meets the cutoff - if yes, proceed, if not, draw the "not enough data" message
 
-    // get range (high/low) for each year function
-    getRange();
+    if (Object.keys(thisCountyDataset.years).length < numberOfYears) {
 
+        notEnoughDataMessage(width, height, svg);
+
+    } else {
+        // call the chart functions
+        getRange();
+        draw();
+    }    
+    
+/*====================================================================
+       getRange()   
+       get range (high/low) for each year function
+    ==================================================================*/
     function getRange() {
         // sort the nest by year by late stage percentage
         nestByYear.forEach(function (d, i) {
@@ -110,12 +124,11 @@ function callLateStageRange(chartID) {
             });
             years.push(d.key);
         });
+    }
 
-        console.log(highest, lowest);
-    };
-
-    draw();
-
+/*====================================================================
+       draw()  
+    ==================================================================*/
     function draw() {
 
         var county = thisCountyDataset.county.name;
@@ -164,24 +177,14 @@ function callLateStageRange(chartID) {
             Drawing
            ================================= */
 
-//        // Chart Title
-//        svg.append("text")
-//            .attr("class", "chart-title")
-//            .attr("x", margin.left)
-//            .attr("y", 0)
-//            .attr("dy", "1em")
-//            .style("text-anchor", "start")
-//            .text("Late Stage % for " + cancerType + " in " + county + " County");
-
         drawRange();
         drawAxes();
         drawCountyLine();
 
-    };
+    }
     /*====================================================================
        Mouse Functions   
     ==================================================================*/
-
     function mouseoverFunc(d) {
         var x = xScale(dateFormat.parse(d.year));
         var y = yScale(d.data.late_stage_percentage);
@@ -200,7 +203,7 @@ function callLateStageRange(chartID) {
     function mouseoutFunc(d) {
         circle.attr("opacity", 0);
         chartText.attr("opacity", 0);
-    };
+    }
 
     /*====================================================================
        Draw Axes function
@@ -234,7 +237,7 @@ function callLateStageRange(chartID) {
             .style("text-anchor", "start")
             .attr("class", "label")
             .text("Late Stage Percentage (%)");
-    };
+    }
 
     /*====================================================================
        Draw Area Range function
@@ -280,12 +283,12 @@ function callLateStageRange(chartID) {
         groups.append("path")
             .attr("class", "line")
             .style("pointer-events", "none")
-            //            .attr("stroke", "#ccc")
+//            .attr("stroke", "#f1735f")
             .attr("opacity", .5)
             .attr("d", function (d) {
                 return line(d.data);
             });
-    };
+    }
 
     /*====================================================================
        Draw County Line function
@@ -387,5 +390,5 @@ function callLateStageRange(chartID) {
             .style("pointer-events", "all")
             .on("mouseover", mouseoverFunc)
             .on("mouseout", mouseoutFunc);
-    };
-};
+    }
+}

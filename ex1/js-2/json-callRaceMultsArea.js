@@ -6,16 +6,16 @@
 function callRaceMultsArea(chartID) {
     // Heavily simplified version of Jim Vallandingham's Coffee Script tutorial at The National
     // https://flowingdata.com/2014/10/15/linked-small-multiples/
-    var height = 150;
+    var height = raceMultiplesHeight;
     var margin = {
-        top: 35,
+        top: 30,
         right: 15,
-        bottom: 15,
+        bottom: 30,
         left: 50
     };
 
     var color = d3.scale.ordinal()
-        .range(["#f8f7ce", "#ffe59a", "#ffca7d", "#f6755f", "#ffaf71"])
+        .range(raceColors1)
         .domain(races);
 
     var datasetByRace = null,
@@ -30,16 +30,18 @@ function callRaceMultsArea(chartID) {
         return d.year;
     }).left;
 
+    var measure = "late_stage";
+
     // date format
     var dateFormat = d3.time.format("%Y");
 
     //Set up scales
     var xScale = d3.time.scale()
-        .range([margin.left, width - margin.left - margin.right])
+        .range([margin.left, width - margin.right])
         .clamp(true);
 
     var yScale = d3.scale.linear()
-        .range([height - margin.bottom - margin.top, margin.top])
+        .range([height - margin.bottom, margin.top])
         .clamp(true);
 
 
@@ -48,9 +50,9 @@ function callRaceMultsArea(chartID) {
         .x(function (d) {
             return xScale(dateFormat.parse(d.year));
         })
-        .y0(height - margin.bottom - margin.top)
+        .y0(height - margin.bottom)
         .y1(function (d) {
-            return yScale(+d.late_stage);
+            return yScale(+d[measure]);
         });
 
     var line = d3.svg.line()
@@ -58,14 +60,20 @@ function callRaceMultsArea(chartID) {
             return xScale(dateFormat.parse(d.year));
         })
         .y(function (d) {
-            return yScale(+d.late_stage);
+            return yScale(+d[measure]);
         });
 
     var xValue = function (d) {
         return d.year;
     };
     var yValue = function (d) {
-        return d.data[d.race + "_late_stage"];
+        if (measure == "late_stage") {
+            return d.data[d.race + "_late_stage"];
+        } else if (measure == "rate") {
+            return d.data[d.race];
+        } else {
+            console.log("Error: 'measure' variable incorrect");
+        }
     };
 
     // Configure axis generators
@@ -85,16 +93,56 @@ function callRaceMultsArea(chartID) {
         .orient("left")
         .ticks(2)
         .tickFormat(function (d) {
-            return d3.format("%")(d)
+            if (measure == "late_stage") {
+                return d3.format("%")(d)
+            } else if (measure == "rate") {
+                return d3.format(".0f")(d)
+            } else {
+                console.log("Error: 'measure' variable incorrect");
+            }
         })
         .outerTickSize(0)
         .tickSubdivide(1)
-        .tickSize(-width + margin.right + 2 * margin.left)
+        .tickSize(-width + margin.right + margin.left)
         .tickPadding(10);
 
-    draw();
+ // check to see if the dataset meets the cutoff - if yes, proceed, if not, draw the "not enough data" message
+    if (Object.keys(thisCountyDataset.years).length < numberOfYears) {
 
-    function draw() {
+        var height = standardHeight;
+        var svg = d3.select(chartID)
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+        notEnoughDataMessage(width, height, svg);
+
+    } else {
+        //setup our ui buttons:
+        $("#raceMultiples-LS").addClass("selected");
+
+        d3.select("#raceMultiples-RATE")
+            .on("click", function (d, i) {
+                $("#raceMultiples-LS").removeClass("selected");
+                $("#raceMultiples-RATE").addClass("selected");
+                measure = "rate";
+                redraw();
+            });
+        d3.select("#raceMultiples-LS")
+            .on("click", function (d, i) {
+                $("#raceMultiples-RATE").removeClass("selected");
+                $("#raceMultiples-LS").addClass("selected");
+                measure = "late_stage";
+                redraw();
+            });
+        // call the chart functions
+        setupData();
+        draw();
+    } // end check
+    /*====================================================================
+       setupData() Function 
+    ==================================================================*/
+    function setupData() {
 
         var prenest = [];
 
@@ -117,19 +165,36 @@ function callRaceMultsArea(chartID) {
             return d.race;
         }).entries(prenest);
 
-        datasetByRace.sort(function(a, b) {
+        datasetByRace.sort(function (a, b) {
             return (d3.mean(b.values, function (c) {
                 return c["late_stage"];
             })) - (d3.mean(a.values, function (c) {
                 return c["late_stage"];
             }));
         });
+    } // end setupData
+    /*====================================================================
+       draw() Function 
+    ==================================================================*/
 
-
+    function draw() {
         d3.select(chartID).datum(datasetByRace).each(function (thisData) {
             data = thisData;
             // compute domains
-            yScale.domain([0, 1.0]);
+            var ymax;
+
+            if (measure == "late_stage") {
+                ymax = 1.0;
+            } else if (measure == "rate") {
+                ymax = d3.max(datasetByRace, function (d) {
+                    return d3.max(d.values, function (c) {
+                        return c.rate;
+                    });
+
+                });
+            };
+
+            yScale.domain([0, ymax]);
 
             xScale.domain(d3.extent(years, function (d) {
                 return dateFormat.parse(d);
@@ -137,8 +202,10 @@ function callRaceMultsArea(chartID) {
 
             var div = d3.select(this).selectAll(".multiple").data(data);
             div.enter()
-                .append("div")
-                .attr("class", "multiple")
+                .append("svg")
+                .attr("class", "multiple race-svg")
+                .attr("width", width)
+                .attr("height", height)
                 .append("svg");
 
             var svg = div.select("svg")
@@ -149,27 +216,28 @@ function callRaceMultsArea(chartID) {
 
             svg.append("g")
                 .attr("class", "y axis multiple")
-                .attr("transform", "translate(" + (margin.left) + "," + margin.top + ")")
+                .attr("transform", "translate(" + margin.left + ",0)")
                 .call(yAxis)
                 .append("text")
-                .attr("class", "subtitle")
+                .attr("class", "multiples-subtitle")
                 .attr("x", 0)
                 .attr("y", 0)
                 .attr("dy", "1em")
                 .style("text-anchor", "start")
+            .style("fill", "#666")
                 .text(function (d) {
                     return uppercase(d.key) + " Late Stage %";
                 });
             // end axes
 
             var g = svg.append("g")
-                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+                .attr("transform", "translate(" + margin.left + ",0)");
 
             g.append("rect")
                 .attr("class", "background")
                 .style("pointer-events", "all")
-                .attr("width", width - margin.left - margin.left)
-                .attr("height", height - margin.top - margin.bottom)
+                .attr("width", width - margin.right)
+                .attr("height", height - margin.bottom)
                 .attr("fill", "none")
                 .on("mouseover", mouseover)
                 .on("mousemove", mousemove)
@@ -190,7 +258,7 @@ function callRaceMultsArea(chartID) {
                 .attr("opacity", .65);
 
             lines.append("path")
-                .attr("class", "line")
+                .attr("class", "line race-mult")
                 .style("pointer-events", "none")
                 .attr("stroke", function (d) {
                     return color(d.key);
@@ -206,7 +274,7 @@ function callRaceMultsArea(chartID) {
                 .attr("text-anchor", "start")
                 .attr("fill", "#aaa")
                 .style("pointer-events", "none")
-                .attr("dy", 15).attr("y", height - margin.top - margin.bottom)
+                .attr("dy", 15).attr("y", height - margin.bottom)
                 .attr("x", margin.left)
                 .text(function (c) {
                     return c.values[0]["year"];
@@ -218,8 +286,8 @@ function callRaceMultsArea(chartID) {
                 .attr("fill", "#aaa")
                 .style("pointer-events", "none")
                 .attr("dy", 15)
-                .attr("y", height - margin.top - margin.bottom)
-                .attr("x", width - margin.right - margin.left)
+                .attr("y", height - margin.bottom)
+                .attr("x", width - margin.right)
                 .text(function (c) {
                     return c.values[c.values.length - 1]["year"];
                 });
@@ -240,11 +308,64 @@ function callRaceMultsArea(chartID) {
                 .attr("text-anchor", "middle")
                 .style("pointer-events", "none")
                 .attr("dy", 15)
-                .attr("y", height - margin.bottom - margin.top);
-
+                .attr("y", height - margin.bottom);
         }); // end multiple
 
-    }; // end draw 
+    } // end draw 
+
+    /*====================================================================
+       redraw()  
+    ==================================================================*/
+    function redraw() {
+
+        svgs = d3.selectAll("svg.multiple.race-svg");
+        var ymax;
+
+        if (measure == "late_stage") {
+            ymax = 1.0;
+        } else if (measure == "rate") {
+            ymax = d3.max(datasetByRace, function (d) {
+                return d3.max(d.values, function (c) {
+                    return c.rate;
+                });
+
+            });
+        };
+
+        yScale.domain([0, ymax]);
+        console.log("in transition", yScale.domain());
+
+        //        yAxis.scale(yScale);
+        svgs.each(function (d) {
+            var chart = d3.select(this);
+
+            console.log("chart", chart);
+            chart.select(".y.axis")
+                .transition()
+                .duration(300)
+                .call(yAxis);
+
+            var thisArea = chart.select("path.area");
+
+            thisArea.transition()
+                .duration(300)
+                .ease("quad")
+                .attr("d", function (c) {
+                    return area(c.values);
+                });
+
+            var thisLine = chart.select("path.line");
+
+            thisLine.transition()
+                .duration(300)
+                .ease("quad")
+                .attr("d", function (c) {
+                    return line(c.values);
+                });
+
+
+        });
+    } // end redraw
     /*====================================================================
        Mouse Functions   
     ==================================================================*/
@@ -252,7 +373,7 @@ function callRaceMultsArea(chartID) {
         circle.attr("opacity", 1.0);
         d3.selectAll(".static-year").classed("hidden", true);
         return mousemove.call(this);
-    };
+    } // end mouseover
 
     function mousemove() {
         var date, index, year;
@@ -272,15 +393,22 @@ function callRaceMultsArea(chartID) {
                 return yScale(yValue(c.values[index]));
             })
             .text(function (c) {
-                return d3.format("%")(yValue(c.values[index]));
+                if (measure == "late_stage") {
+                    return d3.format("%")(yValue(c.values[index]));
+                } else if (measure == "rate") {
+                    return d3.format(".2f")(yValue(c.values[index]));
+                } else {
+                    console.log("Error: 'measure' variable incorrect");
+                }
             });
         return curYear.attr("x", xScale(date)).text(year);
-    };
+    } // end mousemove
 
     function mouseout() {
         d3.selectAll(".static-year").classed("hidden", false);
         circle.attr("opacity", 0);
         caption.text("");
         return curYear.text("");
-    };
-};
+    } // end mouseout
+    
+} // end callRaceMultsArea

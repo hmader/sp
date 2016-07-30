@@ -4,7 +4,7 @@
 // *********************************************** 
 
 function callCountyRanking(chartID) {
-    var height = 300;
+    var height = standardHeight;
     var margin = {
         top: 35,
         right: 50,
@@ -15,6 +15,8 @@ function callCountyRanking(chartID) {
     var averages = [];
     var measure = "late_stage_percentage",
         axesText = "Avg. Late Stage Percentage";
+
+    var countyMeans = [];
 
     var bisect = d3.bisector(function (d) {
         return d.date;
@@ -27,15 +29,6 @@ function callCountyRanking(chartID) {
 
     var xScale = d3.scale.ordinal()
         .rangeBands([margin.left, width - margin.right], .2);
-
-    //Configure axis generators
-    var xAxis = d3.svg.axis()
-        .scale(xScale)
-        .orient("bottom");
-
-    var yAxis = d3.svg.axis()
-        .scale(yScale)
-        .orient("left");
 
     //Create the empty SVG image
     var svg = d3.select(chartID)
@@ -50,37 +43,46 @@ function callCountyRanking(chartID) {
         .orient("bottom")
         .tickPadding(10);
 
-
     var yAxis = d3.svg.axis()
         .scale(yScale)
         .orient("left")
         .outerTickSize(0)
         .tickSubdivide(1)
         .innerTickSize(-width + margin.right + margin.left)
-        .tickPadding(10);
+        .tickPadding(10)
+        .tickFormat(function (d) {
+            if (measure == "late_stage_percentage") {
+                return d3.format("%")(d)
+            } else if (measure == "total_ratio") {
+                return d3.format(".2f")(d)
+            } else {
+                console.log("Error: 'measure' variable incorrect");
+            }
+        });
 
     //setup our ui buttons:
     d3.select("#countyrank-LS")
         .on("click", function (d, i) {
-        $("#countyrank-RATE").removeClass("selected");
-        $("#countyrank-LS").addClass("selected");
+            $("#countyrank-RATE").removeClass("selected");
+            $("#countyrank-LS").addClass("selected");
             measure = "late_stage_percentage";
             draw(measure);
         });
     d3.select("#countyrank-RATE")
         .on("click", function (d, i) {
-        $("#countyrank-LS").removeClass("selected");
-        $("#countyrank-RATE").addClass("selected");
+            $("#countyrank-LS").removeClass("selected");
+            $("#countyrank-RATE").addClass("selected");
             measure = "total_ratio";
             draw(measure);
         });
 
-    /*====================================================================
-         Draw
-    ======================================================================*/
+    // call the functions
     setupData();
     draw(measure);
 
+    /*====================================================================
+         setupData(), also draws axes and text labels
+    ======================================================================*/
     function setupData() {
 
         // getting the averages of late stage percentage of each county in a neat little array
@@ -91,9 +93,22 @@ function callCountyRanking(chartID) {
             var total_ratio_mean = d3.mean(d.values, function (c) {
                 return c.total_ratio;
             });
+
             if (isNaN(total_ratio_mean)) {
                 total_ratio_mean = 0;
             };
+
+            if (isNaN(late_stage_mean)) {
+                late_stage_mean = 0;
+            };
+
+            if (d.key == countyNumber) {
+                countyMeans.push({
+                    late_stage_percentage: late_stage_mean,
+                    total_ratio: total_ratio_mean
+                });
+            };
+
             averages.push({
                 county: d.key,
                 late_stage_percentage_mean: late_stage_mean,
@@ -140,8 +155,30 @@ function callCountyRanking(chartID) {
             .style("text-anchor", "start")
             .attr("class", "label")
             .text("");
+
+        var countyLabel = svg.append("text")
+            .attr("class", "county-ranking-label county-label")
+            .style("opacity", 1)
+            .text(function (d) {
+                return countyMap[countyNumber];
+            })
+            .attr("dy", "1.2em")
+            .attr("dx", ".5em")
+            .attr("fill", "#444")
+            .attr("text-anchor", "middle");
+
+        var countyValue = svg.append("text")
+            .attr("class", " county-ranking-label county-value")
+            .style("opacity", 1)
+            .attr("dy", "1.2em")
+            .attr("dx", ".5em")
+            .attr("fill", "#444")
+            .attr("text-anchor", "middle");
     };
 
+    /*====================================================================
+         draw(), includes transitions
+    ======================================================================*/
     function draw(measure) {
         averages.sort(function (a, b) {
             return b[measure + "_mean"] - a[measure + "_mean"];
@@ -160,10 +197,9 @@ function callCountyRanking(chartID) {
         );
 
         /// draw the bars
-
         var bars = svg.selectAll("rect.bar")
-            .data(averages, function(d) {
-             return d.county;   
+            .data(averages, function (d) {
+                return d.county;
             });
 
         bars.enter()
@@ -190,12 +226,7 @@ function callCountyRanking(chartID) {
             .attr("transform", function (d) {
                 return "translate(" + xScale(d.county) + ",0)"
             })
-
-        //            .attr("x", function (d) {
-        //                //                console.log(d);
-        //                return xScale(d.county);
-        //            })
-        .attr("height", function (d) {
+            .attr("height", function (d) {
                 return height - margin.bottom - yScale(+d[measure + "_mean"]);
             })
             .attr("width", xScale.rangeBand())
@@ -219,14 +250,36 @@ function callCountyRanking(chartID) {
         svg.select(".y.axis")
             .transition()
             .duration(300)
+            .ease("quad")
             .call(yAxis);
 
         svg.select(".x.axis")
             .transition()
             .duration(300)
+            .ease("quad")
             .call(xAxis);
-    };
 
+        //  transition the labels
+        var countyLabel = svg.select("text.county-label")
+            .transition()
+            .duration(500)
+            .ease("quad")
+            .attr("transform", "translate(" + xScale(countyNumber) + "," + (height - margin.bottom + 10) + ")");
+        var countyValue = svg.select("text.county-value")
+            .transition()
+            .duration(500)
+            .ease("quad")
+            .attr("transform", "translate(" + xScale(countyNumber) + "," + (yScale(countyMeans[0][measure]) - 25) + ")")
+            .text(function () {
+                if (measure == "late_stage_percentage") {
+                    return d3.format("%")(countyMeans[0][measure]);
+                } else if (measure == "total_ratio") {
+                    return d3.format(".2f")(countyMeans[0][measure]);
+                } else {
+                    console.log("Error: 'measure' variable incorrect");
+                }
+            });
+    }
     /*====================================================================
          Mouse Functions
     ======================================================================*/

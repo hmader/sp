@@ -16,7 +16,7 @@ function callRaceBubbles(chartID) {
     var reformatted = [];
 
     var color = d3.scale.ordinal()
-        .range(["#f8f7ce", "#ffe59a", "#ffca7d", "#ffaf71", "#f6755f"])
+        .range(raceColors2)
         .domain(population);
 
     //Set up scale

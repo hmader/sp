@@ -24,14 +24,15 @@ function callRaceRateLines(chartID) {
     }).left;
 
     var color = d3.scale.ordinal()
-        .range(["#f8f7ce", "#ffe59a", "#ffca7d", "#f6755f", "#ffaf71"])
+        .range(raceColors1)
         .domain(races);
-                
+
     var dateFormat = d3.time.format("%Y");
 
     //Configure line generator
     // each line dataset must have a d.year and a d.rate for this to work.
     var line = d3.svg.line()
+//        .interpolate("cardinal")
         .x(function (d) {
             return xScale(dateFormat.parse(d.year));
         })
@@ -124,14 +125,14 @@ function callRaceRateLines(chartID) {
         /*=====================================================================
           Adding the Axes
  ======================================================================*/
-//        // Chart Title
-//        svg.append("text")
-//            .attr("class", "chart-title")
-//            .attr("x", margin.left)
-//            .attr("y", 0)
-//            .attr("dy", "1em")
-//            .style("text-anchor", "start")
-//            .text("Rates per 10,000 by Race");
+        //        // Chart Title
+        //        svg.append("text")
+        //            .attr("class", "chart-title")
+        //            .attr("x", margin.left)
+        //            .attr("y", 0)
+        //            .attr("dy", "1em")
+        //            .style("text-anchor", "start")
+        //            .text("Rates per 10,000 by Race");
 
         svg.append("g")
             .attr("class", "x axis")

@@ -4,8 +4,8 @@
 // *********************************************** 
 
 function callZipCodeRateRankings(chartID) {
-    var width = 500;
-    var height = 300;
+    //    var width = 500;
+    var height = standardHeight;
     var margin = {
         top: 35,
         right: 50,
@@ -13,6 +13,7 @@ function callZipCodeRateRankings(chartID) {
         left: 65
     };
 
+    var filteredZips, nestedZips;
     var averages = [];
     var ranked = [];
     var measure = "highest";
@@ -30,38 +31,59 @@ function callZipCodeRateRankings(chartID) {
         .attr("width", width)
         .attr("height", height);
 
-    //setup our ui buttons:
-    d3.select("#zipcodeRATE-high")
-        .on("click", function (d, i) {
-            $("#zipcodeRATE-low").removeClass("selected");
-            $("#zipcodeRATE-high").addClass("selected");
-            measure = "highest";
-            draw();
-        });
-    d3.select("#zipcodeRATE-low")
-        .on("click", function (d, i) {
-            $("#zipcodeRATE-high").removeClass("selected");
-            $("#zipcodeRATE-low").addClass("selected");
-            measure = "lowest";
-            draw();
-        });
+    // check to see if the dataset meets the cutoff - if yes, proceed, if not, draw the "not enough data" message
+    setData();
+    
+    if (filteredZips.length < zipcodeListLength) {
+
+        notEnoughDataMessage(width, height, svg);
+
+    } else {
+        // set up buttons
+        $("#zipcodeRATE-high").addClass("selected");
+
+        d3.select("#zipcodeRATE-high")
+            .on("click", function (d, i) {
+                $("#zipcodeRATE-low").removeClass("selected");
+                $("#zipcodeRATE-high").addClass("selected");
+                measure = "highest";
+                draw();
+            });
+
+        d3.select("#zipcodeRATE-low")
+            .on("click", function (d, i) {
+                $("#zipcodeRATE-high").removeClass("selected");
+                $("#zipcodeRATE-low").addClass("selected");
+                measure = "lowest";
+                draw();
+            });
+
+        // draw!
+        draw();
+
+        // separation line
+        svg.append("line")
+            .attr("x1", margin.left - 10)
+            .attr("y1", margin.top)
+            .attr("x2", margin.left - 10)
+            .attr("y2", height - margin.bottom)
+            .attr("stroke", "#ccc")
+            .attr("stroke-width", 3);
+    }
 
     /*====================================================================
-           Data formatting
-        ==================================================================*/
-    setData();
+               Data formatting
+            ==================================================================*/
 
     function setData() {
-        var filteredZips, nestedZips;
-
         // filter the zipcode data to make sure we get zipcodes without nulls
         filteredZips = zipcodesDataset.filter(function (d) {
             return d["total"] != null;
         });
 
         nestedZips = d3.nest().key(function (d) {
-            //                console.log(d.county);
-            return d.county;
+            //                console.log(d.zipcode);
+            return d.zipcode;
         }).entries(filteredZips);
 
         nestedZips.forEach(function (d) {
@@ -87,29 +109,10 @@ function callZipCodeRateRankings(chartID) {
         xScale.domain([0, d3.max(averages, function (d) {
             return d["mean"];
         })]);
-
-//        //Title
-//        svg.append("text")
-//            .attr("class", "chart-title")
-//            .attr("x", margin.left)
-//            .attr("y", 0)
-//            .attr("dy", "1em")
-//            .style("text-anchor", "start")
-//            .text(uppercase(measure) + " Zipcodes for Average Rate per 100,000");
-        // separation line
-        svg.append("line")
-            .attr("x1", margin.left - 10)
-            .attr("y1", margin.top)
-            .attr("x2", margin.left - 10)
-            .attr("y2", height - margin.bottom)
-            .attr("stroke", "#ccc")
-            .attr("stroke-width", 3);
-    };
+    }
     /*====================================================================
      draw()
     ==================================================================*/
-
-    draw();
 
     function draw() {
         //        d3.selectAll("g.label-group").remove();
@@ -207,10 +210,10 @@ function callZipCodeRateRankings(chartID) {
     function mouseover(d, i) {
         svg.selectAll("text.label" + i)
             .attr("fill", "#f1735f");
-    };
+    }
 
     function mouseout(d, i) {
         svg.selectAll("text.label" + i)
             .attr("fill", "#666");
-    };
-};
+    }
+}

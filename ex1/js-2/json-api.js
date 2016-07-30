@@ -1,4 +1,4 @@
-var countyNumber = 367;
+var countyNumber = 360;
 var startYear = 2004;
 var endYear = 2013;
 var cancerType = 5;
@@ -15,6 +15,9 @@ function loaded(error, allCounties, allZips, thisCounty, countyNameMap) { // loa
     thisCountyDataset = thisCounty;
     countyMap = countyNameMap;
 
+    $(".county-name-text").text(countyMap[countyNumber] + " County");
+
+    $(".cancer-type-text").text(thisCountyDataset.cancer.name + " Cancer");
     // formatting
     setupData(allCountiesDataset);
     // call the function(s) - unless we have multiple pages or triggers, just call all of the chart functions
@@ -26,8 +29,8 @@ function loaded(error, allCounties, allZips, thisCounty, countyNameMap) { // loa
 =====================================================================*/
 queue()
     .defer(d3.json, 'http://scanportal.org/json/county/raw/' + cancerType) // all counties in FL
-    .defer(d3.json, 'http://scanportal.org/json/zipcode/raw/' + countyNumber + '/' + cancerType)
-    .defer(d3.json, 'http://scanportal.org/json/county/' + countyNumber + '/' + cancerType + '/' + startYear + '/' + endYear) // all zipcodes
+    .defer(d3.json, 'http://scanportal.org/json/zipcode/raw/' + countyNumber + '/' + cancerType) // all zipcodes
+    .defer(d3.json, 'http://scanportal.org/json/county/' + countyNumber + '/' + cancerType + '/' + startYear + '/' + endYear) // this county
     .defer(d3.json, 'http://scanportal.org/api/counties') // county id - name map
     .await(loaded);
 
@@ -53,7 +56,7 @@ function setupData(d) {
     console.log("NBC", nestByCounty);
     console.log("MBC", mapByCounty);
     console.log("THIS C", thisCountyDataset);
-    console.log("GET", mapByCounty.get(countyNumber));
+    console.log("ZIPS", zipcodesDataset);
 }
 
 /*=====================================================================
@@ -67,27 +70,12 @@ function callAllCharts() {
     callLateStageRange("#lateStageRangeChart");
     callCountArea("#countAreaChart");
     callRaceBubbles("#raceBubbleChart");
-    //    callRaceStreamgraph("#raceStreamgraph");
-    //    callRaceStackedArea("#raceStackedArea");
     callGPie("#genderPieChart");
-    callRaceRateLines("#raceRateLineChart");
+//    callRaceRateLines("#raceRateLineChart");
     callRaceMultsArea("#raceSmallMultiplesChart");
-    callGenderRateLines("#genderRateLineChart");
+//    callGenderRateLines("#genderRateLineChart");
     callGenderMultsArea("#genderSmallMultiplesChart");
     callAgeScatter("#zipcodeScatterChart");
-}
-
-/*=====================================================================
- set up selections
-=====================================================================*/
-
-function setSelectionOptions() {
-    var selections = $("select#county-selector");
-
-    nestByCounty.forEach(function (d) {
-        selections.append("<option>" + d.key + "</option>");
-    });
-
 }
 
 /*=====================================================================
