@@ -165,13 +165,19 @@ function callRaceMultsArea(chartID) {
             return d.race;
         }).entries(prenest);
 
-        datasetByRace.sort(function (a, b) {
-            return (d3.mean(b.values, function (c) {
-                return c["late_stage"];
-            })) - (d3.mean(a.values, function (c) {
-                return c["late_stage"];
-            }));
+        // sort by alphabetical order
+        datasetByRace.sort(function(a, b) {
+           return a.race - b.race; 
         });
+        
+        // sort by mean late_stage value
+//        datasetByRace.sort(function (a, b) {
+//            return (d3.mean(b.values, function (c) {
+//                return c["late_stage"];
+//            })) - (d3.mean(a.values, function (c) {
+//                return c["late_stage"];
+//            }));
+//        });
     } // end setupData
     /*====================================================================
        draw() Function 

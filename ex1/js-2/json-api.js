@@ -1,4 +1,4 @@
-var countyNumber = 360;
+var countyNumber = 385;
 var startYear = 2004;
 var endYear = 2013;
 var cancerType = 5;
@@ -64,12 +64,14 @@ function setupData(d) {
 =====================================================================*/
 
 function callAllCharts() {
+    callBigStats();
     callCountyRanking("#countyBarChart");
     callZipCodeLateStageRankings("#zipcodeLSBarChart");
     callZipCodeRateRankings("#zipcodeRATEBarChart");
     callLateStageRange("#lateStageRangeChart");
     callCountArea("#countAreaChart");
     callRaceBubbles("#raceBubbleChart");
+    callRaceBubbleCluster("#raceBubbleCluster");
     callGPie("#genderPieChart");
 //    callRaceRateLines("#raceRateLineChart");
     callRaceMultsArea("#raceSmallMultiplesChart");

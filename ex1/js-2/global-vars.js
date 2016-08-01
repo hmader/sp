@@ -2,7 +2,7 @@ var maxWidth = 800;
 var width;
 var zipcodeWidth;
 
-var standardHeight = 300;
+var standardHeight = 330;
 var raceMultiplesHeight = 105;
 var genderMultiplesHeight = 150;
 

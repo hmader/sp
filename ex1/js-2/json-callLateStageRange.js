@@ -9,7 +9,7 @@ function callLateStageRange(chartID) {
     //Dimensions and padding
     var height = standardHeight;
     var margin = {
-        top: 35,
+        top: 65,
         right: 50,
         bottom: 50,
         left: 100
@@ -17,7 +17,7 @@ function callLateStageRange(chartID) {
 
     //Set up date formatting and years
     var dateFormat = d3.time.format("%Y");
-    var circle, bindingLine, chartText;
+    var circle, yearLine, chartText;
 
     //Create new, empty arrays to hold our restructured datasets
     var years = [];
@@ -55,7 +55,6 @@ function callLateStageRange(chartID) {
 
     //Configure area generator
     var area = d3.svg.area()
-//        .interpolate("cardinal")
         .x(function (d) {
             return xScale(dateFormat.parse(d.year));
         })
@@ -66,7 +65,6 @@ function callLateStageRange(chartID) {
 
     //Configure line generator
     var line = d3.svg.line()
-//        .interpolate("cardinal")
         .x(function (d) {
             return xScale(dateFormat.parse(d.year));
         })
@@ -80,7 +78,7 @@ function callLateStageRange(chartID) {
         .append("svg")
         .attr("width", width)
         .attr("height", height);
-    
+
     // check to see if the dataset meets the cutoff - if yes, proceed, if not, draw the "not enough data" message
 
     if (Object.keys(thisCountyDataset.years).length < numberOfYears) {
@@ -91,12 +89,12 @@ function callLateStageRange(chartID) {
         // call the chart functions
         getRange();
         draw();
-    }    
-    
-/*====================================================================
-       getRange()   
-       get range (high/low) for each year function
-    ==================================================================*/
+    }
+
+    /*====================================================================
+           getRange()   
+           get range (high/low) for each year function
+        ==================================================================*/
     function getRange() {
         // sort the nest by year by late stage percentage
         nestByYear.forEach(function (d, i) {
@@ -126,9 +124,9 @@ function callLateStageRange(chartID) {
         });
     }
 
-/*====================================================================
-       draw()  
-    ==================================================================*/
+    /*====================================================================
+           draw()  
+        ==================================================================*/
     function draw() {
 
         var county = thisCountyDataset.county.name;
@@ -177,11 +175,63 @@ function callLateStageRange(chartID) {
             Drawing
            ================================= */
 
+        legend();
         drawRange();
         drawAxes();
         drawCountyLine();
 
     }
+
+    /*====================================================================
+         legend()
+    ======================================================================*/
+    function legend() {
+        var legend = svg.append("g")
+            .attr("class", "mylegend")
+            .attr("transform", "translate(0,0)");
+
+        var iconWidth = 35;
+        var iconHeight = 10;
+        var margin = 10;
+
+
+        var tc = legend.append("g")
+            .attr("class", "legendGroup");
+
+        tc.append("line")
+            .attr("x1", 0)
+            .attr("y1", iconHeight / 2)
+            .attr("x2", iconWidth)
+            .attr("y2", iconHeight / 2)
+            .attr("stroke", "#f1735f")
+            .attr("stroke-width", 3);
+
+        tc.append("text")
+            .attr("x", iconWidth + 5)
+            .attr("y", iconHeight)
+            .style("text-anchor", "start")
+            .attr("class", "legendLabel")
+            .text(thisCountyDataset.county.name + " County LS%");
+
+        var range = legend.append("g")
+            .attr("class", "legendGroup")
+            .attr("transform", function () {
+                return "translate(" + (tc.node().getBBox().width + margin) + ",0)"
+            });
+
+        range.append("rect")
+            .attr("height", iconHeight)
+            .attr("width", iconWidth)
+            .attr("fill", "#cccccc")
+            .attr("opacity", .25);
+
+        range.append("text")
+            .attr("x", iconWidth + 5)
+            .attr("y", iconHeight)
+            .style("text-anchor", "start")
+            .attr("class", "legendLabel")
+            .text("Range of Late Stage Percentage in FL");
+    } // end legend()
     /*====================================================================
        Mouse Functions   
     ==================================================================*/
@@ -195,14 +245,20 @@ function callLateStageRange(chartID) {
             .attr("opacity", 1.0);
         chartText
             .attr("x", x)
-            .attr("y", y - 20)
+            .attr("y", y - 15)
             .attr("opacity", 1.0)
             .text(d3.format("%")(d.data.late_stage_percentage));
+        yearLine.attr("x1", x)
+            .attr("y1", y)
+            .attr("x2", x)
+            .attr("y2", yScale(0))
+            .attr("opacity", 1.0);
     };
 
     function mouseoutFunc(d) {
         circle.attr("opacity", 0);
         chartText.attr("opacity", 0);
+        yearLine.attr("opacity", 0);
     }
 
     /*====================================================================
@@ -263,30 +319,20 @@ function callLateStageRange(chartID) {
             .attr("class", "area")
             .attr("fill", function (d) {
                 if (d.bound == "highest") {
-                    return "#f1735f";
+                    return "#cccccc";
                 } else {
                     return "#ffffff";
                 }
             })
             .attr("opacity", function (d) {
                 if (d.bound == "highest") {
-                    return .17;
+                    return .18;
                 } else {
                     return 1;
                 }
             })
             .attr("d", function (d) {
                 return area(d.data)
-            });
-
-        // Line over the area
-        groups.append("path")
-            .attr("class", "line")
-            .style("pointer-events", "none")
-//            .attr("stroke", "#f1735f")
-            .attr("opacity", .5)
-            .attr("d", function (d) {
-                return line(d.data);
             });
     }
 
@@ -317,6 +363,14 @@ function callLateStageRange(chartID) {
             .attr("opacity", .85)
             .attr("d", line);
 
+        // line leading to year of hover
+        yearLine = svg.append("line")
+            .attr("stroke-width", 1)
+            .attr("stroke", "#f1735f")
+            .style("stroke-dasharray", ("5, 5"))
+            .style("pointer-events", "none")
+            .attr("opacity", 0);
+
         // Circles to show the values for the year on hover
         circle = svg.append("circle")
             .attr("r", 5)
@@ -326,8 +380,9 @@ function callLateStageRange(chartID) {
             .attr("fill", "#fff")
             .style("pointer-events", "none");
 
-
+        // text of value above circle
         chartText = svg.append("text")
+            .attr("class", "smaller-bold")
             .style("text-anchor", "middle")
             .attr("opacity", 0);
 

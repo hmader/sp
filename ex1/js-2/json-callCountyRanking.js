@@ -6,7 +6,7 @@
 function callCountyRanking(chartID) {
     var height = standardHeight;
     var margin = {
-        top: 35,
+        top: 65,
         right: 50,
         bottom: 70,
         left: 100
@@ -54,7 +54,7 @@ function callCountyRanking(chartID) {
             if (measure == "late_stage_percentage") {
                 return d3.format("%")(d)
             } else if (measure == "total_ratio") {
-                return d3.format(".2f")(d)
+                return d3.format(".0f")(d)
             } else {
                 console.log("Error: 'measure' variable incorrect");
             }
@@ -66,6 +66,7 @@ function callCountyRanking(chartID) {
             $("#countyrank-RATE").removeClass("selected");
             $("#countyrank-LS").addClass("selected");
             measure = "late_stage_percentage";
+            axesText = "Avg. Late Stage Percentage";
             draw(measure);
         });
     d3.select("#countyrank-RATE")
@@ -73,6 +74,7 @@ function callCountyRanking(chartID) {
             $("#countyrank-LS").removeClass("selected");
             $("#countyrank-RATE").addClass("selected");
             measure = "total_ratio";
+            axesText = "Avg. Rate per 100,000";
             draw(measure);
         });
 
@@ -149,15 +151,21 @@ function callCountyRanking(chartID) {
             .append("text")
             .attr("class", "label")
             .attr("transform", "rotate(-90)")
-            .attr("x", -height + margin.bottom + margin.top)
+            .attr("x", -height + margin.bottom)
             .attr("y", -60)
             .attr("dy", "1em")
             .style("text-anchor", "start")
-            .attr("class", "label")
-            .text("");
+            .attr("class", "label");
 
-        var countyLabel = svg.append("text")
-            .attr("class", "county-ranking-label county-label")
+        //legend 
+        legend();
+
+        // appending the group for all of the highlighted county labelling details
+        var labelGroup = svg.append("g")
+            .attr("class", "labels");
+
+        labelGroup.append("text")
+            .attr("class", "smaller-bold county-label")
             .style("opacity", 1)
             .text(function (d) {
                 return countyMap[countyNumber];
@@ -167,13 +175,23 @@ function callCountyRanking(chartID) {
             .attr("fill", "#444")
             .attr("text-anchor", "middle");
 
-        var countyValue = svg.append("text")
-            .attr("class", " county-ranking-label county-value")
+        labelGroup.append("line")
+            .attr("class", "county-label-line")
+            .attr("stroke", "#333333")
+            .attr("stroke-width", 1);
+
+        labelGroup.append("text")
+            .attr("class", " smaller-bold county-value")
             .style("opacity", 1)
             .attr("dy", "1.2em")
             .attr("dx", ".5em")
             .attr("fill", "#444")
             .attr("text-anchor", "middle");
+
+        labelGroup.append("line")
+            .attr("class", "county-value-line")
+            .attr("stroke", "#333333")
+            .attr("stroke-width", 1);
     };
 
     /*====================================================================
@@ -247,11 +265,14 @@ function callCountyRanking(chartID) {
                 }
             });
 
-        svg.select(".y.axis")
+        var yax = svg.select(".y.axis")
             .transition()
             .duration(300)
             .ease("quad")
             .call(yAxis);
+
+        yax.select("text.label")
+            .text(axesText);
 
         svg.select(".x.axis")
             .transition()
@@ -260,15 +281,28 @@ function callCountyRanking(chartID) {
             .call(xAxis);
 
         //  transition the labels
-        var countyLabel = svg.select("text.county-label")
+        var labelGroup = svg.select("g.labels");
+
+        labelGroup.select("text.county-label")
             .transition()
             .duration(500)
             .ease("quad")
             .attr("transform", "translate(" + xScale(countyNumber) + "," + (height - margin.bottom + 10) + ")");
-        var countyValue = svg.select("text.county-value")
+
+        labelGroup.select("line.county-label-line")
             .transition()
             .duration(500)
             .ease("quad")
+            .attr("x1", (xScale(countyNumber) + xScale.rangeBand() / 2))
+            .attr("y1", (height - margin.bottom + 10))
+            .attr("x2", (xScale(countyNumber) + xScale.rangeBand() / 2))
+            .attr("y2", (height - margin.bottom));
+
+        labelGroup.select("text.county-value")
+            .transition()
+            .duration(500)
+            .ease("quad")
+            .style("opacity", 1)
             .attr("transform", "translate(" + xScale(countyNumber) + "," + (yScale(countyMeans[0][measure]) - 25) + ")")
             .text(function () {
                 if (measure == "late_stage_percentage") {
@@ -279,6 +313,96 @@ function callCountyRanking(chartID) {
                     console.log("Error: 'measure' variable incorrect");
                 }
             });
+
+        labelGroup.select("line.county-value-line")
+            .transition()
+            .duration(500)
+            .ease("quad")
+            .attr("x1", (xScale(countyNumber) + xScale.rangeBand() / 2))
+            .attr("y1", yScale(countyMeans[0][measure]))
+            .attr("x2", (xScale(countyNumber) + xScale.rangeBand() / 2))
+            .attr("y2", (yScale(countyMeans[0][measure]) - 8));
+    }
+
+    /*====================================================================
+         legend()
+    ======================================================================*/
+
+
+    function legend() {
+        var legend = svg.append("g")
+            .attr("class", "mylegend")
+            .attr("transform", "translate(0,0)");
+
+        var iconWidth = 35;
+        var iconHeight = 10;
+        var margin = 10;
+        
+        
+        var tc = legend.append("g")
+                .attr("class", "legendGroup");
+
+            tc.append("rect")
+                .attr("height", iconHeight)
+                .attr("width", iconWidth)
+                .attr("fill", "#f1735f");
+        
+            var text = tc.append("text")
+                .attr("x", iconWidth + 5)
+                .attr("y", iconHeight)
+                .style("text-anchor", "start")
+                .attr("class", "legendLabel")
+                .text(thisCountyDataset.county.name + " County");
+        
+        var oc = legend.append("g")
+                .attr("class", "legendGroup")
+                .attr("transform", function () {
+                    return "translate(" + (tc.node().getBBox().width + margin) + ",0)"
+                });
+
+            oc.append("rect")
+                .attr("height", iconHeight)
+                .attr("width", iconWidth)
+                .attr("fill", "#cccccc");
+        
+            oc.append("text")
+                .attr("x", iconWidth + 5)
+                .attr("y", iconHeight)
+                .style("text-anchor", "start")
+                .attr("class", "legendLabel")
+                .text("Other FL Counties");
+
+
+        //                var legend = svg.append("g")
+        //                    .attr("class", "mylegend")
+        //                    .attr("transform", "translate(0,0)");
+        //        
+        //                genders.forEach(function (d, i) {
+        //        
+        //                    var iconWidth = 35;
+        //                    var iconHeight = 15;
+        //                    var margin = 70;
+        //                    var g = legend.append("g")
+        //                        .attr("class", "legendGroup")
+        //                        .attr("transform", function () {
+        //                            return "translate(" + (iconWidth * i + margin * i) + ",0)"
+        //                        });
+        //        
+        //                    g.append("rect")
+        //                        .attr("height", iconHeight)
+        //                        .attr("width", iconWidth)
+        //                        .attr("fill", function () {
+        //                            console.log("GENDER", d);
+        //                            return color(d);
+        //                        });
+        //                    g.append("text")
+        //                        .attr("x", iconWidth + 5)
+        //                        .attr("y", iconHeight)
+        //                        .style("text-anchor", "start")
+        //                        .attr("class", "legendLabel")
+        //                        .text(uppercase(d));
+        //                });
+
     }
     /*====================================================================
          Mouse Functions

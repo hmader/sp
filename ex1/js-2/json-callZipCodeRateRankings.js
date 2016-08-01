@@ -4,7 +4,7 @@
 // *********************************************** 
 
 function callZipCodeRateRankings(chartID) {
-    //    var width = 500;
+    var thisW = width*.45;
     var height = standardHeight;
     var margin = {
         top: 35,
@@ -20,7 +20,7 @@ function callZipCodeRateRankings(chartID) {
 
     //Set up scales, notice rangeBands for bar charts
     var xScale = d3.scale.linear()
-        .range([margin.left, width - margin.right]);
+        .range([margin.left, thisW - margin.right]);
 
     var yScale = d3.scale.ordinal()
         .rangeBands([margin.top, height - margin.bottom], .3);
@@ -28,15 +28,15 @@ function callZipCodeRateRankings(chartID) {
     //Create the empty SVG image
     var svg = d3.select(chartID)
         .append("svg")
-        .attr("width", width)
+        .attr("width", thisW)
         .attr("height", height);
 
     // check to see if the dataset meets the cutoff - if yes, proceed, if not, draw the "not enough data" message
     setData();
-    
+
     if (filteredZips.length < zipcodeListLength) {
 
-        notEnoughDataMessage(width, height, svg);
+        notEnoughDataMessage(thisW, height, svg);
 
     } else {
         // set up buttons
@@ -157,7 +157,7 @@ function callZipCodeRateRankings(chartID) {
         zipcodeLabel.enter()
             .append("text")
             .attr("class", function (d, i) {
-                return ("zipcodeLabel zipcodes-ranking " + "label" + i);
+                return ("zipcodeLabel smaller-bold " + "label" + i);
             });
         zipcodeLabel.transition()
             .duration(300)
@@ -182,7 +182,7 @@ function callZipCodeRateRankings(chartID) {
         valueLabel.enter()
             .append("text")
             .attr("class", function (d, i) {
-                return ("valueLabel zipcodes-ranking " + "label" + i);
+                return ("valueLabel smaller-bold " + "label" + i);
             });
         valueLabel.transition()
             .duration(300)
@@ -214,6 +214,6 @@ function callZipCodeRateRankings(chartID) {
 
     function mouseout(d, i) {
         svg.selectAll("text.label" + i)
-            .attr("fill", "#666");
+            .attr("fill", "#444");
     }
 }

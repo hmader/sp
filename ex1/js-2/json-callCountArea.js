@@ -8,7 +8,7 @@ function callCountArea(chartID) {
     //Dimensions and padding
     var height = standardHeight;
     var margin = {
-        top: 35,
+        top: 65,
         right: 50,
         bottom: 50,
         left: 90
@@ -163,6 +163,7 @@ function callCountArea(chartID) {
         draw()
         ======================================================================*/
     function draw() {
+        legend();
         //Axes
         svg.append("g")
             .attr("class", "x axis")
@@ -189,6 +190,7 @@ function callCountArea(chartID) {
             .attr("dy", "1em")
             .style("text-anchor", "start")
             .attr("class", "label")
+        .text("Rate per 100,000");
 
         // Create the line between the two circles - x and y values set later, on hover
         bindingLine = svg.append("line")
@@ -251,6 +253,55 @@ function callCountArea(chartID) {
             .on("mousemove", mousemoveFunc)
             .on("mouseout", mouseoutFunc);
     } // end draw()
+    
+        /*====================================================================
+         legend()
+    ======================================================================*/
+    function legend() {
+        var legend = svg.append("g")
+            .attr("class", "mylegend")
+            .attr("transform", "translate(0,0)");
+
+        var iconWidth = 35;
+        var iconHeight = 10;
+        var margin = 10;
+        
+        
+        var total = legend.append("g")
+                .attr("class", "legendGroup");
+
+            total.append("rect")
+                .attr("height", iconHeight)
+                .attr("width", iconWidth)
+                .attr("fill", "#f1735f")
+            .attr("opacity", .4);
+        
+            total.append("text")
+                .attr("x", iconWidth + 5)
+                .attr("y", iconHeight)
+                .style("text-anchor", "start")
+                .attr("class", "legendLabel")
+                .text("Overall Rate");
+        
+        var ls = legend.append("g")
+                .attr("class", "legendGroup")
+                .attr("transform", function () {
+                    return "translate(" + (total.node().getBBox().width + margin) + ",0)"
+                });
+
+            ls.append("rect")
+                .attr("height", iconHeight)
+                .attr("width", iconWidth)
+                .attr("fill", "#f1735f")
+            .attr("opacity", .8);
+        
+            ls.append("text")
+                .attr("x", iconWidth + 5)
+                .attr("y", iconHeight)
+                .style("text-anchor", "start")
+                .attr("class", "legendLabel")
+                .text("Late Stage Rate");
+    } // end legend()
 
     /*====================================================================
          Mouse Functions
@@ -299,7 +350,7 @@ function callCountArea(chartID) {
         return tooltip
             .style("top", (d3.event.pageY) - 80 + "px")
             .style("left", (d3.event.pageX + 15) + "px")
-            .html("<p class='sans'><span class='tooltipHeader'>" + year + "</span><br>Total: " + tooltipTotal + "<br>Late Stage: " + tooltipLateStage + "</p>");
+            .html("<p class='sans'><span class='tooltipHeader'>" + year + "</span><br>Overall Rate: " + tooltipTotal + "<br>Late Stage Rate: " + tooltipLateStage + "</p>");
     } // end mousemove
 
     function mouseoutFunc(d) {

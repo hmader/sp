@@ -335,7 +335,6 @@ function callGenderMultsArea(chartID) {
         yScale.domain([0, ymax]);
         console.log("in transition", yScale.domain());
 
-        //        yAxis.scale(yScale);
         svgs.each(function (d) {
             var chart = d3.select(this);
 
@@ -362,8 +361,6 @@ function callGenderMultsArea(chartID) {
                 .attr("d", function (c) {
                     return line(c.values);
                 });
-
-
         });
     } // end redraw
     /*====================================================================

@@ -1,7 +1,7 @@
 function callGPie(chartID) {
 
     var width = 400,
-        height = 360,
+        height = 500,
         radius = Math.min(2 * width / 3, 2 * height / 3) / 2;
 
     var reformatted = [];
@@ -28,11 +28,14 @@ function callGPie(chartID) {
         .attr("width", width)
         .attr("height", height)
         .append("g")
-        .attr("transform", "translate(" + width / 2 + "," + height / 3 + ")");
+        .attr("transform", "translate(" + radius + "," + height / 3 + ")");
 
     setupData();
     draw();
 
+    /*====================================================================
+          setupData() 
+       ==================================================================*/
     function setupData() {
         var countyPop = thisCountyDataset.population;
         genders.forEach(function (d) {
@@ -44,6 +47,9 @@ function callGPie(chartID) {
         });
     };
 
+    /*====================================================================
+          draw() 
+       ==================================================================*/
     function draw() {
         console.log("reformatted", reformatted);
         console.log(thisCountyDataset.population);
@@ -64,28 +70,37 @@ function callGPie(chartID) {
             .on("mousemove", mousemove)
             .on("mouseout", mouseout);
 
+        legend();
+    }
+    /*====================================================================
+       legend() 
+    ==================================================================*/
+    function legend() {
 
+        // d3 svg legend: http://d3-legend.susielu.com/#summary
         var linear = color;
 
         svg.append("g")
             .attr("class", "legendLinear")
-            .attr("transform", "translate(" + (-radius + 10) + ", " + (radius + 10) + ")");
+            .attr("transform", "translate(" + (radius + 10) + ", " + 0 + ")");
 
         var legendLinear = d3.legend.color()
-            .shapeWidth(30)
+            .shapeWidth(40)
             .orient('vertical')
             .scale(linear);
 
         svg.select(".legendLinear")
             .call(legendLinear);
-    };
+
+    }
+
     /*====================================================================
-           Mouse Functions   
-        ==================================================================*/
+               Mouse Functions   
+            ==================================================================*/
     function mouseover(d) {
         return tooltip
             .style("display", null); // this removes the display none setting
-    };
+    }
 
     function mousemove(d) {
         console.log(d);
@@ -93,9 +108,9 @@ function callGPie(chartID) {
             .style("top", (d3.event.pageY) - 80 + "px")
             .style("left", (d3.event.pageX + 15) + "px")
             .html("<p class='sans'><span class='tooltipHeader'>" + d3.format("%")(d.data.percentage) + " " + uppercase(d.data.gender) + "</span><br>Pop: " + d3.format(",")(d.data.total) + "</p>");
-    };
+    }
 
     function mouseout(d) {
         return tooltip.style("display", "none"); // this hides the tooltip
-    };
-};
+    }
+}

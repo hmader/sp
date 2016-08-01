@@ -4,6 +4,8 @@
 
 body {
     font-family: 'Lato', sans-serif;
+    font-size: 16px;
+    line-height: 1.5em;
     margin: 1em;
     box-sizing: border-box;
 }
@@ -23,6 +25,35 @@ h1 {
 h3 {
     font-weight: bold;
     font-size: 1em;
+    max-width: 600px;
+}
+
+p {
+    font-weight: 300;
+}
+
+.extra-large {
+    font-size: 2.5em;
+    font-weight: bold;
+}
+
+#big-stats {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    display: -webkit-flex;
+    -webkit-flex-direction: row;
+    -webkit-flex-wrap: wrap;
+    -webkit-justify-content: center;
+}
+
+.stat-group {
+    width: 33%;
+    min-width: 200px;
+    max-width: 300px;
+    padding: 2em;
+    text-align: center;
 }
 
 .select {
@@ -97,7 +128,7 @@ button {
 
 button:hover,
 selected:hover {
- cursor: pointer;
+    cursor: pointer;
 }
 
 button.selected {
@@ -114,6 +145,10 @@ button.selected {
     flex-wrap: wrap;
 }
 
+.col-2>div {
+    width: 50%;
+    min-width: 300px;
+}
 
 #charts {
     max-width: 100%;
@@ -127,6 +162,12 @@ button.selected {
 
 .chart-section {
     margin-bottom: 10em;
+    width: 100%;
+    max-width: 800px;
+}
+
+.chart-div {
+    width: 100%;
 }
 
 .chart {
@@ -162,9 +203,12 @@ button.selected {
     font-size: 12px;
     fill: #000;
 }
+
+
 /*  CSS concerning the message that appears when there's not enough data to draw the chart  */
-.not-enough-data-message-text {
-}
+
+.not-enough-data-message-text {}
+
 
 /**/
 
@@ -180,8 +224,9 @@ svg {
     font-weight: bold;
 }
 
-.zipcodes-ranking,
-.county-ranking-label {
+.legendLinear text,
+.smaller-bold,
+.legendLabel {
     font-size: .75em;
     font-weight: bold;
 }
@@ -201,7 +246,7 @@ svg {
 }
 
 .multiples-subtitle,
-.axis.multiple text{
+.axis.multiple text {
     font-size: .7em;
 }
 

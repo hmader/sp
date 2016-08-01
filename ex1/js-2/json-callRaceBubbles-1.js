@@ -18,9 +18,9 @@ function callRaceBubbles(chartID) {
     var color = d3.scale.ordinal()
         .range(raceColors2)
         .domain(population);
-
+ 
     //Set up scale
-    var circleScale = d3.scale.sqrt().range([height, 0]);
+    var circleScale = d3.scale.sqrt().range([height - margin.bottom - margin.top, 0]);
 
     setupData();
     draw();
@@ -90,26 +90,26 @@ function callRaceBubbles(chartID) {
 //                    .on("mousemove", mousemove)
 //                    .on("mouseout", mouseout);
 
-//                g.append("text")
-//                    .attr("class", "subtitle")
-//                    .attr("x", 0)
-//                    .attr("y", -height / 2 + 25)
-//                    .attr("dy", "-1em")
-//                    .style("text-anchor", "middle")
-//                    .style("font-weight", "bold")
-//                    .text(function () {
-//                        return uppercase(d.race);
-//                    });
-//
-//                g.append("text")
-//                    .attr("class", "subtitle")
-//                .style("pointer-events", "none")
-//                    .attr("x", 0)
-//                    .attr("y", height/2 - 5)
-//                    .style("text-anchor", "middle")
-//                    .text(function () {
-//                        return d3.format(",")(d.total);
-//                    });
+                g.append("text")
+                    .attr("class", "subtitle")
+                    .attr("x", 0)
+                    .attr("y", -height / 2 + 25)
+                    .attr("dy", "-1em")
+                    .style("text-anchor", "middle")
+                    .style("font-weight", "bold")
+                    .text(function () {
+                        return uppercase(d.race);
+                    });
+
+                g.append("text")
+                    .attr("class", "subtitle")
+                .style("pointer-events", "none")
+                    .attr("x", 0)
+                    .attr("y", height/2 - 5)
+                    .style("text-anchor", "middle")
+                    .text(function () {
+                        return d3.format(",")(d.total);
+                    });
 
             }); // end multiple
 
