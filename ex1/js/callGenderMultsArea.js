@@ -2,10 +2,15 @@
 // This is the function to call the small multiples
 // for late stage percentage by gender
 // *********************************************** 
+// Heavily simplified version of Jim Vallandingham's Coffee Script tutorial at The National
+// https://flowingdata.com/2014/10/15/linked-small-multiples/
 
 function callGenderMultsArea(chartID) {
-     // Heavily simplified version of Jim Vallandingham's Coffee Script tutorial at The National
-    // https://flowingdata.com/2014/10/15/linked-small-multiples/
+
+    /**************** 
+      Dimension vars
+    ****************/
+    var width = $(chartID).width();
     var height = genderMultiplesHeight;
     var margin = {
         top: 30,
@@ -14,10 +19,9 @@ function callGenderMultsArea(chartID) {
         left: 50
     };
 
-    var color = d3.scale.ordinal()
-        .range(["#f6755f", "#ffaf71"])
-        .domain(genders);
-
+    /******************** 
+     Data and chart vars
+    ********************/
     var datasetByGender = null,
         years = [],
         data = [],
@@ -25,12 +29,14 @@ function callGenderMultsArea(chartID) {
         caption = null,
         lines = null,
         curYear = null;
+    var measure = "late_stage";
 
+    /******************************* 
+     scales and d3 chart generators
+    ********************************/
     var bisect = d3.bisector(function (d) {
         return d.year;
     }).left;
-
-    var measure = "late_stage";
 
     // date format
     var dateFormat = d3.time.format("%Y");
@@ -44,6 +50,9 @@ function callGenderMultsArea(chartID) {
         .range([height - margin.bottom, margin.top])
         .clamp(true);
 
+    var color = d3.scale.ordinal()
+        .range(genderColors)
+        .domain(genders);
 
     //Configure area generator
     var area = d3.svg.area()
@@ -55,6 +64,7 @@ function callGenderMultsArea(chartID) {
             return yScale(+d[measure]);
         });
 
+    // Configure line generator
     var line = d3.svg.line()
         .x(function (d) {
             return xScale(dateFormat.parse(d.year));
@@ -63,9 +73,11 @@ function callGenderMultsArea(chartID) {
             return yScale(+d[measure]);
         });
 
+    // returns x and y values
     var xValue = function (d) {
         return d.year;
     };
+
     var yValue = function (d) {
         if (measure == "late_stage") {
             return d.data[d.gender + "_late_stage"];
@@ -77,7 +89,6 @@ function callGenderMultsArea(chartID) {
     };
 
     // Configure axis generators
-
     var xAxis = d3.svg.axis()
         .scale(xScale)
         .orient("bottom")
@@ -106,7 +117,10 @@ function callGenderMultsArea(chartID) {
         .tickSize(-width + margin.right + margin.left)
         .tickPadding(10);
 
- // check to see if the dataset meets the cutoff - if yes, proceed, if not, draw the "not enough data" message
+    /*====================================================================
+        check to see if the dataset meets the cutoff - if yes, proceed, if not, draw the "not enough data" message
+    ==================================================================*/
+
     if (Object.keys(thisCountyDataset.years).length < numberOfYears) {
 
         var height = standardHeight;
@@ -121,6 +135,9 @@ function callGenderMultsArea(chartID) {
         //setup our ui buttons:
         $("#genderMultiples-LS").addClass("selected");
 
+        /******************** 
+            html button setup
+            *********************/
         d3.select("#genderMultiples-RATE")
             .on("click", function (d, i) {
                 $("#genderMultiples-LS").removeClass("selected");
@@ -135,7 +152,9 @@ function callGenderMultsArea(chartID) {
                 measure = "late_stage";
                 redraw();
             });
+
         // call the chart functions
+        legend();
         setupData();
         draw();
     } // end check
@@ -161,45 +180,56 @@ function callGenderMultsArea(chartID) {
             years.push(key);
         });
 
+        // main dataset we use for the charts
         datasetByGender = d3.nest().key(function (d) {
             return d.gender;
         }).entries(prenest);
 
+        // sort by alphabetical order
         datasetByGender.sort(function (a, b) {
-            return (d3.mean(b.values, function (c) {
-                return c["late_stage"];
-            })) - (d3.mean(a.values, function (c) {
-                return c["late_stage"];
-            }));
+            return a.race - b.race;
         });
+
+        //// sort by mean late_stage value (displays multiples in this order
+        //        datasetByGender.sort(function (a, b) {
+        //            return (d3.mean(b.values, function (c) {
+        //                return c["late_stage"];
+        //            })) - (d3.mean(a.values, function (c) {
+        //                return c["late_stage"];
+        //            }));
+        //        });
     } // end setupData
     /*====================================================================
        draw() Function 
     ==================================================================*/
 
     function draw() {
+        // for each object in datasetByGender, create a multiple
         d3.select(chartID).datum(datasetByGender).each(function (thisData) {
             data = thisData;
+
             // compute domains
             var ymax;
 
             if (measure == "late_stage") {
-                ymax = 1.0;
+                ymax = 1.0; // 100% for late stage percentage
             } else if (measure == "rate") {
                 ymax = d3.max(datasetByGender, function (d) {
-                    return d3.max(d.values, function (c) {
+                    return d3.max(d.values, function (c) { // max rate
                         return c.rate;
                     });
 
                 });
             };
 
+            // set domains
             yScale.domain([0, ymax]);
 
             xScale.domain(d3.extent(years, function (d) {
                 return dateFormat.parse(d);
             }));
 
+            // add a new SVG for the multiple, named div 
             var div = d3.select(this).selectAll(".multiple").data(data);
             div.enter()
                 .append("svg")
@@ -212,8 +242,7 @@ function callGenderMultsArea(chartID) {
                 .attr("width", width)
                 .attr("height", height);
 
-            // Axes
-
+            // Y axis only
             svg.append("g")
                 .attr("class", "y axis multiple")
                 .attr("transform", "translate(" + margin.left + ",0)")
@@ -224,7 +253,7 @@ function callGenderMultsArea(chartID) {
                 .attr("y", 0)
                 .attr("dy", "1em")
                 .style("text-anchor", "start")
-            .style("fill", "#666")
+                .style("fill", "#666")
                 .text(function (d) {
                     return uppercase(d.key);
                 });
@@ -233,6 +262,7 @@ function callGenderMultsArea(chartID) {
             var g = svg.append("g")
                 .attr("transform", "translate(" + margin.left + ",0)");
 
+            // background to accept mouse events
             g.append("rect")
                 .attr("class", "background")
                 .style("pointer-events", "all")
@@ -243,9 +273,11 @@ function callGenderMultsArea(chartID) {
                 .on("mousemove", mousemove)
                 .on("mouseout", mouseout);
 
+            // area and line for each multiple
             var lines = g.append("g")
                 .attr("transform", "translate(" + (-margin.left) + ",0)");
 
+            // append the area 
             lines.append("path")
                 .attr("class", "area")
                 .style("pointer-events", "none")
@@ -257,6 +289,7 @@ function callGenderMultsArea(chartID) {
                 })
                 .attr("opacity", .65);
 
+            // append the line
             lines.append("path")
                 .attr("class", "line gender-mult")
                 .style("pointer-events", "none")
@@ -267,7 +300,9 @@ function callGenderMultsArea(chartID) {
                     return line(c.values);
                 });
 
-            //********************
+            /**************************************************
+              The year and value elements that appear on hover
+            ***************************************************/
 
             lines.append("text")
                 .attr("class", "static-year")
@@ -314,11 +349,14 @@ function callGenderMultsArea(chartID) {
     } // end draw 
 
     /*====================================================================
-       redraw()  
+       redraw() - for transformations on click
     ==================================================================*/
     function redraw() {
 
+        // select all of the svgs!
         svgs = d3.selectAll("svg.multiple.gender-svg");
+
+        //reset the domains
         var ymax;
 
         if (measure == "late_stage") {
@@ -335,6 +373,7 @@ function callGenderMultsArea(chartID) {
         yScale.domain([0, ymax]);
         console.log("in transition", yScale.domain());
 
+        // transition each svg
         svgs.each(function (d) {
             var chart = d3.select(this);
 
@@ -363,6 +402,56 @@ function callGenderMultsArea(chartID) {
                 });
         });
     } // end redraw
+    
+   /*====================================================================
+         legend()
+ ======================================================================*/
+
+    function legend() {
+        // add the legend group element to the svg
+        var svg = d3.select(chartID)
+            .append("svg")
+            .attr("width", width)
+            .attr("height", 65)
+            .attr("class", "mylegend");
+
+        // translate variable - updated with each legend element
+        var translate = 0;
+
+        // append legend group
+        var legend = svg.append("g")
+            .attr("class", "mylegend");
+
+        genders.forEach(function (d, i) {
+
+            var iconWidth = 35;
+            var iconHeight = 10;
+            var margin = 10;
+
+            var g = legend.append("g")
+                .attr("class", "legendGroup")
+                .attr("transform", function () {
+                    return "translate(" + translate + ",0)"
+                });
+
+            g.append("rect")
+                .attr("height", iconHeight)
+                .attr("width", iconWidth)
+                .attr("fill", function () {
+                    console.log("GENDER", d);
+                    return color(d);
+                });
+            g.append("text")
+                .attr("x", iconWidth + 5)
+                .attr("y", iconHeight)
+                .style("text-anchor", "start")
+                .attr("class", "legendLabel")
+                .text(uppercase(d));
+
+            translate += (g.node().getBBox().width + margin);
+        });
+
+    } // end legend()    
     /*====================================================================
        Mouse Functions   
     ==================================================================*/
@@ -407,5 +496,5 @@ function callGenderMultsArea(chartID) {
         caption.text("");
         return curYear.text("");
     } // end mouseout
-    
+
 } // end callGenderMultsArea

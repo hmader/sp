@@ -3,10 +3,11 @@
 // for zip code top/bottom lists
 // *********************************************** 
 
-function callZipCodeLateStageRankings(chartID) {
-
-    // local vars
-    var thisW = width*.45;
+function callZipCodeRateRankings(chartID) {
+    /**************** 
+      Dimension vars
+    ****************/
+    var width = $(chartID).width();
     var height = standardHeight;
     var margin = {
         top: 35,
@@ -15,63 +16,60 @@ function callZipCodeLateStageRankings(chartID) {
         left: 65
     };
 
+    /******************** 
+     Data and chart vars
+    ********************/
     var filteredZips, nestedZips;
     var averages = [];
     var ranked = [];
     var measure = "highest";
 
+    /******************************* 
+     scales and d3 chart generators
+    ********************************/
     //Set up scales, notice rangeBands for bar charts
     var xScale = d3.scale.linear()
-        .range([margin.left, thisW - margin.right]);
+        .range([margin.left, width - margin.right]);
 
     var yScale = d3.scale.ordinal()
         .rangeBands([margin.top, height - margin.bottom], .3);
 
-    // Configure axis generators
-    var xAxis = d3.svg.axis()
-        .scale(xScale)
-        .orient("bottom")
-        .outerTickSize(0)
-        .tickSubdivide(1)
-        .innerTickSize(-height + margin.top + margin.bottom)
-        .tickPadding(10);
-
-    var yAxis = d3.svg.axis()
-        .scale(yScale)
-        .orient("left")
-        .ticks(0)
-        .tickValues(yScale.domain().filter(function (d, i) {
-            return !(i % 2);
-        }));
-
-    //Create the empty SVG image
+    /******************** 
+     Main svg
+    ********************/
     var svg = d3.select(chartID)
         .append("svg")
-        .attr("width", thisW)
+        .attr("width", width)
         .attr("height", height);
 
-    // check to see if the dataset meets the cutoff - if yes, proceed, if not, draw the "not enough data" message
-
+   /*====================================================================
+        check to see if the dataset meets the cutoff - if yes, proceed, if not, draw the "not enough data" message
+    ==================================================================*/
+// set up the data first, we check from the nonNullZips
     setData();
 
     if (filteredZips.length < zipcodeListLength) {
 
-        notEnoughDataMessage(thisW, height, svg);
+        notEnoughDataMessage(width, height, svg);
 
     } else {
-        $("#zipcodeLS-high").addClass("selected");
-        //setup our ui buttons:
-        d3.select("#zipcodeLS-high")
+        /******************** 
+          html button setup
+        *********************/
+        $("#zipcodeRATE-high").addClass("selected");
+
+        d3.select("#zipcodeRATE-high")
             .on("click", function (d, i) {
-                $("#zipcodeLS-low").removeClass("selected");
-                $("#zipcodeLS-high").addClass("selected");
+                $("#zipcodeRATE-low").removeClass("selected");
+                $("#zipcodeRATE-high").addClass("selected");
                 measure = "highest";
                 draw();
             });
-        d3.select("#zipcodeLS-low")
+
+        d3.select("#zipcodeRATE-low")
             .on("click", function (d, i) {
-                $("#zipcodeLS-high").removeClass("selected");
-                $("#zipcodeLS-low").addClass("selected");
+                $("#zipcodeRATE-high").removeClass("selected");
+                $("#zipcodeRATE-low").addClass("selected");
                 measure = "lowest";
                 draw();
             });
@@ -79,7 +77,7 @@ function callZipCodeLateStageRankings(chartID) {
         // draw!
         draw();
 
-        // separation line
+        // draw separation line here, it has no transition
         svg.append("line")
             .attr("x1", margin.left - 10)
             .attr("y1", margin.top)
@@ -87,24 +85,26 @@ function callZipCodeLateStageRankings(chartID) {
             .attr("y2", height - margin.bottom)
             .attr("stroke", "#ccc")
             .attr("stroke-width", 3);
-    }
+    } // end check
+
     /*====================================================================
                Data formatting
-            ==================================================================*/
+    ==================================================================*/
 
     function setData() {
         // filter the zipcode data to make sure we get zipcodes without nulls
         filteredZips = zipcodesDataset.filter(function (d) {
-            return d["late_stage_percentage"] != null;
+            return d["total"] != null;
         });
 
         nestedZips = d3.nest().key(function (d) {
+            //                console.log(d.zipcode);
             return d.zipcode;
         }).entries(filteredZips);
 
         nestedZips.forEach(function (d) {
             var mean = d3.mean(d.values, function (c) {
-                return c["late_stage_percentage"];
+                return c["total"];
             });
             averages.push({
                 zipcode: d.key,
@@ -118,70 +118,72 @@ function callZipCodeLateStageRankings(chartID) {
 
         // array with two data arrays
         ranked.push({
-            highest: averages.slice(0, zipcodeListLength),
-            lowest: averages.slice((averages.length - zipcodeListLength), averages.length)
+            highest: averages.slice(0, 5),
+            lowest: averages.slice((averages.length - 5), averages.length)
         });
         //    Set x scale domain - does not change
         xScale.domain([0, d3.max(averages, function (d) {
             return d["mean"];
         })]);
-    }
+    } // end setData()
     /*====================================================================
      draw()
     ==================================================================*/
 
     function draw() {
+        //        d3.selectAll("g.label-group").remove();
         //    Set y scale domain - changes with selection
         yScale.domain(ranked[0][measure].map(function (d) {
             return d.zipcode;
         }));
 
+        // select all rect.bar elements, bind the data
         var bars = svg.selectAll("rect.bar")
             .data(ranked[0][measure]);
 
+        // add the new bars
         bars.enter()
             .append("rect")
-            .attr("class", function (d, i) {
-                return ("bar " + d.zipcode);
-            })
-            .attr("fill", "#f1735f")
-            .attr("opacity", .7)
+            .attr("class", "bar")
             .on("mouseover", mouseover)
             .on("mouseout", mouseout);
 
+        // remove the unwanted bars (not in the dataset)
         bars.exit()
             .transition()
             .duration(300)
             .ease("exp")
-            .attr("translate", "transform(x," + yScale(height) + ")")
+            .attr("width", 0)
             .remove();
 
+        // transition new and remaining bars
         bars.transition()
             .duration(300)
             .ease("quad")
             .attr("x", margin.left)
-            .attr("transform", function (d) {
-                return "translate(0," + yScale(d.zipcode) + ")"
+            .attr("y", function (d) {
+                return yScale(d.zipcode);
             })
             .attr("width", function (d) {
                 return xScale(+d.mean) - margin.left;
             })
-            .attr("height", yScale.rangeBand());
+            .attr("height", yScale.rangeBand())
+            .attr("fill", "#f1735f")
+            .attr("opacity", .7);
 
-        //  We are attaching the labels, transition added
+         /**************************************** 
+          setup the labels (enter exit transition)
+         *****************************************/
+        // label that is the zipcode
         var zipcodeLabel = svg.selectAll("text.zipcodeLabel")
             .data(ranked[0][measure]);
-        zipcodeLabel.exit()
-            .transition()
-            .duration(150)
-            .ease("exp")
-            .style("opacity", 0)
-            .remove();
+        
         zipcodeLabel.enter()
             .append("text")
             .attr("class", function (d, i) {
-                return ("zipcodeLabel smaller-bold " + "label" + i);
+                return ("zipcodeLabel " + "label" + i); // the second class is so we can select all the same classed elements on hover of a bar
             });
+        
         zipcodeLabel.transition()
             .duration(300)
             .ease("quad")
@@ -195,18 +197,20 @@ function callZipCodeLateStageRankings(chartID) {
             .attr("transform", function (d) {
                 return "translate(0," + (yScale(d.zipcode)) + ")"
             })
-            .attr("dy", "1.2em")
-            .attr("dx", ".5em")
+            .attr("dy", (yScale.rangeBand() / 2 + 5))
             .attr("fill", "#444")
             .attr("text-anchor", "start");
 
+        // label that is the value (rate)
         var valueLabel = svg.selectAll("text.valueLabel")
             .data(ranked[0][measure]);
+        
         valueLabel.enter()
             .append("text")
             .attr("class", function (d, i) {
-                return "valueLabel smaller-bold " + "label" + i;
+                return ("valueLabel smaller-bold " + "label" + i); // the second class is so we can select all the same classed elements on hover of a bar
             });
+        
         valueLabel.transition()
             .duration(300)
             .ease("quad")
@@ -215,18 +219,17 @@ function callZipCodeLateStageRankings(chartID) {
             .duration(300)
             .style("opacity", 1)
             .text(function (d) {
-                return d3.format("%")(d.mean);
+                return d3.format(".2f")(d.mean);
             })
             .attr("transform", function (d) {
                 return "translate(" + xScale(d.mean) + "," + yScale(d.zipcode) + ")";
             })
-            .attr("dy", "1.2em")
+            .attr("dy", (yScale.rangeBand() / 2 + 5))
             .attr("dx", ".5em")
             .attr("fill", "#444")
             .attr("text-anchor", "start")
             .attr("text-anchor", "start");
-    }
-
+    } // end draw()
     /*====================================================================
          Mouse Functions
     ======================================================================*/
@@ -234,10 +237,10 @@ function callZipCodeLateStageRankings(chartID) {
     function mouseover(d, i) {
         svg.selectAll("text.label" + i)
             .attr("fill", "#f1735f");
-    }
+    } // end mouseover
 
     function mouseout(d, i) {
         svg.selectAll("text.label" + i)
             .attr("fill", "#444");
-    }
-}
+    } // end mouseout
+} // end callZipCodeRateRankings()

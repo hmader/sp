@@ -6,7 +6,10 @@
 
 function callLateStageRange(chartID) {
 
-    //Dimensions and padding
+    /**************** 
+      Dimension vars
+    ****************/
+    var width = $(chartID).width();
     var height = standardHeight;
     var margin = {
         top: 65,
@@ -15,8 +18,9 @@ function callLateStageRange(chartID) {
         left: 100
     };
 
-    //Set up date formatting and years
-    var dateFormat = d3.time.format("%Y");
+    /******************** 
+     Data and chart vars
+    ********************/
     var circle, yearLine, chartText;
 
     //Create new, empty arrays to hold our restructured datasets
@@ -25,6 +29,13 @@ function callLateStageRange(chartID) {
     var lowest = [];
     var areaData = [];
     var datasetYears = [];
+
+    /******************************* 
+     scales and d3 chart generators
+    ********************************/
+
+    //Set up date formatting and years
+    var dateFormat = d3.time.format("%Y");
 
     //Set up scales
     var xScale = d3.time.scale()
@@ -72,14 +83,17 @@ function callLateStageRange(chartID) {
             return yScale(+d.percentage);
         });
 
-
-    //Create the empty SVG image
+    /***************** 
+         Main svg
+        ******************/
     var svg = d3.select(chartID)
         .append("svg")
         .attr("width", width)
         .attr("height", height);
 
-    // check to see if the dataset meets the cutoff - if yes, proceed, if not, draw the "not enough data" message
+    /*====================================================================
+        check to see if the dataset meets the cutoff - if yes, proceed, if not, draw the "not enough data" message
+    ==================================================================*/
 
     if (Object.keys(thisCountyDataset.years).length < numberOfYears) {
 
@@ -88,14 +102,16 @@ function callLateStageRange(chartID) {
     } else {
         // call the chart functions
         getRange();
+        setupData();
         draw();
-    }
+    } // end check
 
     /*====================================================================
            getRange()   
-           get range (high/low) for each year function
-        ==================================================================*/
+           get range (high/low) for each year function (gray area on chart)
+==================================================================*/
     function getRange() {
+        // the range includes data from all counties
         // sort the nest by year by late stage percentage
         nestByYear.forEach(function (d, i) {
             d.values.sort(function (a, b) {
@@ -122,16 +138,13 @@ function callLateStageRange(chartID) {
             });
             years.push(d.key);
         });
-    }
-
+    } // end getRange()
+    
     /*====================================================================
-           draw()  
-        ==================================================================*/
-    function draw() {
+           setupData()  
+     ==================================================================*/
 
-        var county = thisCountyDataset.county.name;
-        var cancerType = thisCountyDataset.cancer.name;
-
+    function setupData() {
         highest.sort(function (a, b) {
             return a.year - b.year;
         });
@@ -171,30 +184,35 @@ function callLateStageRange(chartID) {
             });
         });
 
-        /* ================================= 
-            Drawing
-           ================================= */
+    } // end setupData()
 
+    /*====================================================================
+           draw()  
+     ==================================================================*/
+    function draw() {
+        // call the functions that draw
         legend();
         drawRange();
         drawAxes();
         drawCountyLine();
-
-    }
+    } // end draw
 
     /*====================================================================
          legend()
-    ======================================================================*/
+ ======================================================================*/
     function legend() {
+        
+        // legend group
         var legend = svg.append("g")
             .attr("class", "mylegend")
             .attr("transform", "translate(0,0)");
 
+        // icons sizes and margin between legend elements
         var iconWidth = 35;
         var iconHeight = 10;
         var margin = 10;
 
-
+// we set these manually because it's not based off of what's in an array/ we can't loop through an array to draw the icons in the legend
         var tc = legend.append("g")
             .attr("class", "legendGroup");
 
@@ -216,7 +234,7 @@ function callLateStageRange(chartID) {
         var range = legend.append("g")
             .attr("class", "legendGroup")
             .attr("transform", function () {
-                return "translate(" + (tc.node().getBBox().width + margin) + ",0)"
+                return "translate(" + (tc.node().getBBox().width + margin) + ",0)" // tc.node().getBBox().width gives us the width of the "tc" element (icon and text) we created above. Translate the next element over this much plus the margin
             });
 
         range.append("rect")
@@ -231,6 +249,7 @@ function callLateStageRange(chartID) {
             .style("text-anchor", "start")
             .attr("class", "legendLabel")
             .text("Range of Late Stage Percentage in FL");
+        
     } // end legend()
     /*====================================================================
        Mouse Functions   
@@ -253,17 +272,17 @@ function callLateStageRange(chartID) {
             .attr("x2", x)
             .attr("y2", yScale(0))
             .attr("opacity", 1.0);
-    };
+    } // end mouseover()
 
     function mouseoutFunc(d) {
         circle.attr("opacity", 0);
         chartText.attr("opacity", 0);
         yearLine.attr("opacity", 0);
-    }
+    } // end mouseout()
 
     /*====================================================================
        Draw Axes function
-    ======================================================================*/
+ ======================================================================*/
 
     function drawAxes() {
         //Axes
@@ -293,11 +312,11 @@ function callLateStageRange(chartID) {
             .style("text-anchor", "start")
             .attr("class", "label")
             .text("Late Stage Percentage (%)");
-    }
+    } // end drawAxes()
 
     /*====================================================================
        Draw Area Range function
-    ======================================================================*/
+ ======================================================================*/
 
     function drawRange() {
         //Make a group for each count type
@@ -334,11 +353,11 @@ function callLateStageRange(chartID) {
             .attr("d", function (d) {
                 return area(d.data)
             });
-    }
+    } // end drawRange()
 
     /*====================================================================
        Draw County Line function
-    ======================================================================*/
+ ======================================================================*/
 
     function drawCountyLine() {
 
@@ -445,5 +464,5 @@ function callLateStageRange(chartID) {
             .style("pointer-events", "all")
             .on("mouseover", mouseoverFunc)
             .on("mouseout", mouseoutFunc);
-    }
-}
+    } // end drawCountyLine()
+} // end callLateStageRange()

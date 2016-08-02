@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Scan Portal Expl.1</title>
+    <link href='https://fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="css/main.css">
+    <!--    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"></script>-->
+    <!--    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>-->
+</head>
+
+<body>
+    <!--  Charts Section  -->
+    <section id="charts">
+        <h3><span class="chart-div-header"><span class="county-name-text"></span></span></h3>
+        <div id="big-stats" class="chart-div">
+            <div class="stat-group">
+                <p id="new-cases-stat" class="extra-large"></p>
+                <p>New Cases of Breast Cancer in 2013</p>
+            </div>
+            <div class="stat-group">
+                <p id="average-late-stage-stat" class="extra-large"></p>
+                <p>Average Late Stage Percentage from 2004-2013</p>
+            </div>
+            <div class="stat-group">
+                <p id="average-rate-stat" class="extra-large"></p>
+                <p>Average Rate per 100,000 from 2004-2013</p>
+            </div>
+        </div>
+        </div>
+        <div class="chart-div">
+            <h3><span class="chart-div-header">Breakdown of Population in <span class="county-name-text"></span> by Race</span></h3>
+            <div id="raceBubbleChart" class="chart"></div>
+        </div>
+        <div class="chart-div">
+            <h3><span class="chart-div-header">Breakdown of Population in <span class="county-name-text"></span> by Gender</span></h3>
+            <div id="genderPieChart" class="chart"></div>
+        </div>
+        <div class="chart-div">
+            <h3><span class="chart-div-header">Florida County Rankings in <span class="cancer-type-text"></span></span></h3>
+            <p>Counties Ranked by Late Stage % and Rate per 100,000 in <span class="cancer-type-text"></span>, Averaged from 2004 to 2013</p>
+            <div class="button-wrap">
+                <button id="countyrank-LS" class="selected">Order by Late Stage %</button>
+                <button id="countyrank-RATE">Order by Rate</button>
+            </div>
+            <div id="countyBarChart" class="chart"></div>
+        </div>
+        <div class="chart-div">
+            <h3><span class="chart-div-header"><span class="county-name-text"></span> Zipcodes Ranked by Late Stage %</span></h3>
+            <p>Highest/Lowest <span class="county-name-text"></span> Zipcodes for Late Stage Percentage in <span class="cancer-type-text"></span>, Averaged from 2004 to 2013</p>
+            <div class="button-wrap">
+                <button id="zipcodeLS-high">Show Highest % Zipcodes</button>
+                <button id="zipcodeLS-low">Show Lowest % Zipcodes</button>
+            </div>
+            <div id="zipcodeLSBarChart" class="chart"></div>
+        </div>
+        <div class="chart-div">
+            <h3><span class="chart-div-header"><span class="county-name-text"></span> Zipcodes Ranked by Rate</span></h3>
+            <p>Highest/Lowest <span class="county-name-text"></span> Zipcodes for Rate per 100,000 in <span class="cancer-type-text"></span>, Averaged from 2004 to 2013</p>
+            <div class="button-wrap">
+                <button id="zipcodeRATE-high">Show Highest Rate Zipcodes</button>
+                <button id="zipcodeRATE-low">Show Lowest Rate Zipcodes</button>
+            </div>
+            <div id="zipcodeRATEBarChart" class="chart"></div>
+        </div>
+        <div class="chart-div">
+            <h3><span class="chart-div-header">Late Stage Percentage Trends for <span class="cancer-type-text"></span> in <span class="county-name-text"></span></span></h3>
+             <p>Late stage percentage from 2004 - 2013 for <span class="cancer-type-text"></span> in <span class="county-name-text"></span></p>
+            <div id="lateStageRangeChart" class="chart"></div>
+        </div>
+        <div class="chart-div">
+            <h3><span class="chart-div-header"><span class="cancer-type-text"></span> Rate Trends in <span class="county-name-text"></span></span></h3>
+            <p>Overall and late stage rates per 100,000 from 2004 - 2013 for <span class="cancer-type-text"></span> in <span class="county-name-text"></span></p>
+            <div id="countAreaChart" class="chart"></div>
+        </div>
+        <!--
+            <h3>Rates per 100,000 for <span class="cancer-type-text"></span> by Race</h3>
+            <div id="raceRateLineChart" class="chart"></div>
+-->
+        <div class="chart-div">
+            <h3><span class="chart-div-header">Race and <span class="cancer-type-text"></span> in <span class="county-name-text"></span></span></h3>
+            <p>Late Stage Percentage and Rate per 100,000 in <span class="cancer-type-text"></span> from 2004 - 2013 by Race in <span class="county-name-text"></span></p>
+            <div class="button-wrap">
+                <button id="raceMultiples-LS">Show Late Stage %</button>
+                <button id="raceMultiples-RATE">Show Rates</button>
+            </div>
+            <div id="raceSmallMultiplesChart" class="chart"></div>
+        </div>
+        <!--
+            <h3>Rates per 100,000 for <span class="cancer-type-text"></span> by Gender in <span class="county-name-text"></span></h3>
+            <div id="genderRateLineChart" class="chart"></div>
+-->
+        <div class="chart-div">
+            <h3><span class="chart-div-header">Gender and <span class="cancer-type-text"></span> in <span class="county-name-text"></span></span></h3>
+            <p>Late Stage Percentage and Rate per 100,000 in <span class="cancer-type-text"></span> from 2004 - 2013 by Gender in <span class="county-name-text"></span></p>
+            <div class="button-wrap">
+                <button id="genderMultiples-LS">Show Late Stage %</button>
+                <button id="genderMultiples-RATE">Show Rates</button>
+            </div>
+            <div id="genderSmallMultiplesChart" class="chart"></div>
+        </div>
+    </section>
+    <!--  end Charts Section  -->
+
+    <!--  Scripts  -->
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+    <script src="//d3js.org/d3.v3.min.js"></script>
+    <script src="//d3js.org/queue.v1.min.js"></script>
+    <script src="js/d3-legend.min.js"></script>
+    <script type="text/javascript" src="js/callBigStats.js"></script>
+    <script type="text/javascript" src="js/callCountArea.js"></script>
+    <script type="text/javascript" src="js/callLateStageRange.js"></script>
+    <script type="text/javascript" src="js/callRaceMultsArea.js"></script>
+    <script type="text/javascript" src="js/callRaceRateLines.js"></script>
+    <script type="text/javascript" src="js/callGenderRateLines.js"></script>
+    <script type="text/javascript" src="js/callZipCodeLateStageRankings.js"></script>
+    <script type="text/javascript" src="js/callZipCodeRateRankings.js"></script>
+    <script type="text/javascript" src="js/callGenderMultsArea.js"></script>
+    <script type="text/javascript" src="js/callCountyRanking.js"></script>
+    <script type="text/javascript" src="js/callRaceBubbles.js"></script>
+    <script type="text/javascript" src="js/callGPie.js"></script>
+    <script type="text/javascript" src="js/main.js"></script>
+    <!--  end Scripts  -->
+</body>
+
+</html>

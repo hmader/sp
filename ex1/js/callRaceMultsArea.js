@@ -2,10 +2,13 @@
 // This is the function to call the small multiples
 // for late stage percentage by race
 // *********************************************** 
-
+// Heavily simplified version of Jim Vallandingham's Coffee Script tutorial at The National
+// https://flowingdata.com/2014/10/15/linked-small-multiples/
 function callRaceMultsArea(chartID) {
-    // Heavily simplified version of Jim Vallandingham's Coffee Script tutorial at The National
-    // https://flowingdata.com/2014/10/15/linked-small-multiples/
+    /**************** 
+      Dimension vars
+    ****************/
+    var width = $(chartID).width();
     var height = raceMultiplesHeight;
     var margin = {
         top: 30,
@@ -14,10 +17,9 @@ function callRaceMultsArea(chartID) {
         left: 50
     };
 
-    var color = d3.scale.ordinal()
-        .range(raceColors1)
-        .domain(races);
-
+    /******************** 
+      Data and chart vars
+        ********************/
     var datasetByRace = null,
         years = [],
         data = [],
@@ -25,13 +27,11 @@ function callRaceMultsArea(chartID) {
         caption = null,
         lines = null,
         curYear = null;
-
-    var bisect = d3.bisector(function (d) {
-        return d.year;
-    }).left;
-
     var measure = "late_stage";
 
+    /******************************* 
+     scales and d3 chart generators
+    ********************************/
     // date format
     var dateFormat = d3.time.format("%Y");
 
@@ -44,6 +44,14 @@ function callRaceMultsArea(chartID) {
         .range([height - margin.bottom, margin.top])
         .clamp(true);
 
+    var color = d3.scale.ordinal()
+        .range(raceColors1)
+        .domain(races);
+
+    // bisector - used to get array index & insert
+    var bisect = d3.bisector(function (d) {
+        return d.year;
+    }).left;
 
     //Configure area generator
     var area = d3.svg.area()
@@ -55,6 +63,7 @@ function callRaceMultsArea(chartID) {
             return yScale(+d[measure]);
         });
 
+    // Configure line generator
     var line = d3.svg.line()
         .x(function (d) {
             return xScale(dateFormat.parse(d.year));
@@ -63,9 +72,11 @@ function callRaceMultsArea(chartID) {
             return yScale(+d[measure]);
         });
 
+    // return x and y values
     var xValue = function (d) {
         return d.year;
     };
+
     var yValue = function (d) {
         if (measure == "late_stage") {
             return d.data[d.race + "_late_stage"];
@@ -77,7 +88,6 @@ function callRaceMultsArea(chartID) {
     };
 
     // Configure axis generators
-
     var xAxis = d3.svg.axis()
         .scale(xScale)
         .orient("bottom")
@@ -86,7 +96,6 @@ function callRaceMultsArea(chartID) {
         .tickValues(xScale.domain().filter(function (d, i) {
             return !(i % 2);
         }));
-
 
     var yAxis = d3.svg.axis()
         .scale(yScale)
@@ -106,7 +115,10 @@ function callRaceMultsArea(chartID) {
         .tickSize(-width + margin.right + margin.left)
         .tickPadding(10);
 
- // check to see if the dataset meets the cutoff - if yes, proceed, if not, draw the "not enough data" message
+    /*====================================================================
+        check to see if the dataset meets the cutoff - if yes, proceed, if not, draw the "not enough data" message
+    ==================================================================*/
+
     if (Object.keys(thisCountyDataset.years).length < numberOfYears) {
 
         var height = standardHeight;
@@ -121,6 +133,9 @@ function callRaceMultsArea(chartID) {
         //setup our ui buttons:
         $("#raceMultiples-LS").addClass("selected");
 
+        /******************** 
+            html button setup
+            *********************/
         d3.select("#raceMultiples-RATE")
             .on("click", function (d, i) {
                 $("#raceMultiples-LS").removeClass("selected");
@@ -136,6 +151,7 @@ function callRaceMultsArea(chartID) {
                 redraw();
             });
         // call the chart functions
+        legend();
         setupData();
         draw();
     } // end check
@@ -166,46 +182,49 @@ function callRaceMultsArea(chartID) {
         }).entries(prenest);
 
         // sort by alphabetical order
-        datasetByRace.sort(function(a, b) {
-           return a.race - b.race; 
+        datasetByRace.sort(function (a, b) {
+            return a.race - b.race;
         });
-        
-        // sort by mean late_stage value
-//        datasetByRace.sort(function (a, b) {
-//            return (d3.mean(b.values, function (c) {
-//                return c["late_stage"];
-//            })) - (d3.mean(a.values, function (c) {
-//                return c["late_stage"];
-//            }));
-//        });
+
+        //// sort by mean late_stage value (displays multiples in this order
+        //        datasetByRace.sort(function (a, b) {
+        //            return (d3.mean(b.values, function (c) {
+        //                return c["late_stage"];
+        //            })) - (d3.mean(a.values, function (c) {
+        //                return c["late_stage"];
+        //            }));
+        //        });
     } // end setupData
     /*====================================================================
        draw() Function 
     ==================================================================*/
 
     function draw() {
+        // for each object in datasetByGender, create a multiple
         d3.select(chartID).datum(datasetByRace).each(function (thisData) {
             data = thisData;
             // compute domains
             var ymax;
 
             if (measure == "late_stage") {
-                ymax = 1.0;
+                ymax = 1.0; // 100% for late stage percentage
             } else if (measure == "rate") {
                 ymax = d3.max(datasetByRace, function (d) {
-                    return d3.max(d.values, function (c) {
+                    return d3.max(d.values, function (c) { // max rate
                         return c.rate;
                     });
 
                 });
             };
 
+            // set domains
             yScale.domain([0, ymax]);
 
             xScale.domain(d3.extent(years, function (d) {
                 return dateFormat.parse(d);
             }));
 
+            // add a new SVG for the multiple, named div 
             var div = d3.select(this).selectAll(".multiple").data(data);
             div.enter()
                 .append("svg")
@@ -218,8 +237,7 @@ function callRaceMultsArea(chartID) {
                 .attr("width", width)
                 .attr("height", height);
 
-            // Axes
-
+            // Y Axis
             svg.append("g")
                 .attr("class", "y axis multiple")
                 .attr("transform", "translate(" + margin.left + ",0)")
@@ -230,7 +248,7 @@ function callRaceMultsArea(chartID) {
                 .attr("y", 0)
                 .attr("dy", "1em")
                 .style("text-anchor", "start")
-            .style("fill", "#666")
+                .style("fill", "#666")
                 .text(function (d) {
                     return uppercase(d.key);
                 });
@@ -239,6 +257,7 @@ function callRaceMultsArea(chartID) {
             var g = svg.append("g")
                 .attr("transform", "translate(" + margin.left + ",0)");
 
+            // background to accept mouse events
             g.append("rect")
                 .attr("class", "background")
                 .style("pointer-events", "all")
@@ -249,9 +268,11 @@ function callRaceMultsArea(chartID) {
                 .on("mousemove", mousemove)
                 .on("mouseout", mouseout);
 
+            // area and line for each multiple
             var lines = g.append("g")
                 .attr("transform", "translate(" + (-margin.left) + ",0)");
 
+            // append the are
             lines.append("path")
                 .attr("class", "area")
                 .style("pointer-events", "none")
@@ -263,6 +284,7 @@ function callRaceMultsArea(chartID) {
                 })
                 .attr("opacity", .65);
 
+            // append the line
             lines.append("path")
                 .attr("class", "line race-mult")
                 .style("pointer-events", "none")
@@ -273,7 +295,9 @@ function callRaceMultsArea(chartID) {
                     return line(c.values);
                 });
 
-            //********************
+            /**************************************************
+              The year and value elements that appear on hover
+            ***************************************************/
 
             lines.append("text")
                 .attr("class", "static-year")
@@ -320,11 +344,14 @@ function callRaceMultsArea(chartID) {
     } // end draw 
 
     /*====================================================================
-       redraw()  
+       redraw()  - for transformations on click
     ==================================================================*/
     function redraw() {
 
+        // select all of the svgs!
         svgs = d3.selectAll("svg.multiple.race-svg");
+
+        // reset the domains
         var ymax;
 
         if (measure == "late_stage") {
@@ -341,7 +368,7 @@ function callRaceMultsArea(chartID) {
         yScale.domain([0, ymax]);
         console.log("in transition", yScale.domain());
 
-        //        yAxis.scale(yScale);
+        // transition each svg
         svgs.each(function (d) {
             var chart = d3.select(this);
 
@@ -368,10 +395,61 @@ function callRaceMultsArea(chartID) {
                 .attr("d", function (c) {
                     return line(c.values);
                 });
-
-
         });
     } // end redraw
+
+    /*====================================================================
+         legend()
+ ======================================================================*/
+
+    function legend() {
+        // add the legend group element to the svg
+        var svg = d3.select(chartID)
+            .append("svg")
+            .attr("width", width)
+            .attr("height", 65)
+            .attr("class", "mylegend");
+
+        // translate variable - updated with each legend element
+        var translate = 0;
+
+        // append legend group
+        var legend = svg.append("g")
+            .attr("class", "mylegend");
+
+        races.forEach(function (d, i) {
+
+            var iconWidth = 35;
+            var iconHeight = 10;
+            var margin = 10;
+
+            var g = legend.append("g")
+                .attr("class", "legendGroup")
+                .attr("transform", function () {
+                    return "translate(" + translate + ",0)"
+                });
+
+            g.append("rect")
+                .attr("height", iconHeight)
+                .attr("width", iconWidth)
+                .attr("fill", function () {
+                    console.log("GENDER", d);
+                    return color(d);
+                })
+                .style("opacity", .9);
+
+            g.append("text")
+                .attr("x", iconWidth + 5)
+                .attr("y", iconHeight)
+                .style("text-anchor", "start")
+                .attr("class", "legendLabel")
+                .text(uppercase(d));
+
+            translate += (g.node().getBBox().width + margin);
+        });
+
+    } // end legend()
+
     /*====================================================================
        Mouse Functions   
     ==================================================================*/
@@ -379,7 +457,7 @@ function callRaceMultsArea(chartID) {
         circle.attr("opacity", 1.0);
         d3.selectAll(".static-year").classed("hidden", true);
         return mousemove.call(this);
-    } // end mouseover
+    } // end mouseover()
 
     function mousemove() {
         var date, index, year;
@@ -408,13 +486,12 @@ function callRaceMultsArea(chartID) {
                 }
             });
         return curYear.attr("x", xScale(date)).text(year);
-    } // end mousemove
+    } // end mousemove()
 
     function mouseout() {
         d3.selectAll(".static-year").classed("hidden", false);
         circle.attr("opacity", 0);
         caption.text("");
         return curYear.text("");
-    } // end mouseout
-    
-} // end callRaceMultsArea
+    } // end mouseout()
+} // end callRaceMultsArea()

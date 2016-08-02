@@ -6,6 +6,7 @@
 function callGenderRateLines(chartID) {
     // Heavily simplified version of Jim Vallandingham's Coffee Script tutorial at The National
     // https://flowingdata.com/2014/10/15/linked-small-multiples/
+    var width = $(chartID).width();
     var height = 350;
     var margin = {
         top: 60,

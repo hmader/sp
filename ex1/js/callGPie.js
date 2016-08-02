@@ -1,13 +1,22 @@
 function callGPie(chartID) {
 
+    /**************** 
+      Dimension vars
+    ****************/
     var width = 400,
         height = 500,
         radius = Math.min(2 * width / 3, 2 * height / 3) / 2;
 
+    /******************** 
+     Data and chart vars
+    ********************/
     var reformatted = [];
 
+    /******************************* 
+     scales and d3 chart generators
+    ********************************/
     var color = d3.scale.ordinal()
-        .range(["#f6755f", "#ffaf71"])
+        .range(genderColors)
         .domain(genders);
 
     var arc = d3.svg.arc()
@@ -24,6 +33,9 @@ function callGPie(chartID) {
             return +d.total;
         });
 
+    /***************** 
+         Main svg
+        ******************/
     var svg = d3.select(chartID).append("svg")
         .attr("width", width)
         .attr("height", height)
@@ -45,7 +57,7 @@ function callGPie(chartID) {
                 percentage: countyPop[d] / countyPop.total
             });
         });
-    };
+    } // end setupData()
 
     /*====================================================================
           draw() 
@@ -71,7 +83,7 @@ function callGPie(chartID) {
             .on("mouseout", mouseout);
 
         legend();
-    }
+    } // end draw()
     /*====================================================================
        legend() 
     ==================================================================*/
@@ -92,15 +104,15 @@ function callGPie(chartID) {
         svg.select(".legendLinear")
             .call(legendLinear);
 
-    }
+    } // end legend()
 
-    /*====================================================================
-               Mouse Functions   
-            ==================================================================*/
+/*====================================================================
+                   Mouse Functions   
+                ==================================================================*/
     function mouseover(d) {
         return tooltip
             .style("display", null); // this removes the display none setting
-    }
+    } // end mouseover()
 
     function mousemove(d) {
         console.log(d);
@@ -108,9 +120,9 @@ function callGPie(chartID) {
             .style("top", (d3.event.pageY) - 80 + "px")
             .style("left", (d3.event.pageX + 15) + "px")
             .html("<p class='sans'><span class='tooltipHeader'>" + d3.format("%")(d.data.percentage) + " " + uppercase(d.data.gender) + "</span><br>Pop: " + d3.format(",")(d.data.total) + "</p>");
-    }
+    } // end mousemove()
 
     function mouseout(d) {
         return tooltip.style("display", "none"); // this hides the tooltip
-    }
-}
+    } // end mouseout()
+} // end callGPie()

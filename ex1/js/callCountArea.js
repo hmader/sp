@@ -5,7 +5,10 @@
 
 function callCountArea(chartID) {
 
-    //Dimensions and padding
+    /**************** 
+      Dimension vars
+    ****************/
+    var width = $(chartID).width();
     var height = standardHeight;
     var margin = {
         top: 65,
@@ -14,13 +17,9 @@ function callCountArea(chartID) {
         left: 90
     };
 
-    //Set up date formatting and years
-    var dateFormat = d3.time.format("%Y");
-
-    var bisect = d3.bisector(function (d) {
-        return d.year;
-    }).left;
-
+    /******************** 
+     Data and chart vars
+    ********************/
     var circle, bindingLine, circleText;
 
     //Create new, empty arrays to hold our restructured datasets
@@ -29,6 +28,17 @@ function callCountArea(chartID) {
     var years = [];
     var total = [];
     var lateStage = [];
+
+    /******************************* 
+     scales and d3 chart generators
+    ********************************/
+    //Set up date formatting and years
+    var dateFormat = d3.time.format("%Y");
+
+    // bisect - helps us find index/ insert into an array
+    var bisect = d3.bisector(function (d) {
+        return d.year;
+    }).left;
 
     //Set up scales
     var xScale = d3.time.scale()
@@ -54,7 +64,6 @@ function callCountArea(chartID) {
         .outerTickSize(0)
         .tickPadding(10);
 
-
     //Configure area generator
     var area = d3.svg.area()
         .x(function (d) {
@@ -74,11 +83,19 @@ function callCountArea(chartID) {
             return yScale(+d.count);
         });
 
+    /************ 
+      Main svg
+    ************/
     //Create the empty SVG image
     var svg = d3.select(chartID)
         .append("svg")
         .attr("width", width)
         .attr("height", height);
+
+
+    /*====================================================================
+        check to see if the dataset meets the cutoff - if yes, proceed, if not, draw the "not enough data" message
+    ==================================================================*/
 
     if (Object.keys(thisCountyDataset.years).length < numberOfYears) {
 
@@ -91,7 +108,7 @@ function callCountArea(chartID) {
     }
 
     /*====================================================================
-    
+
     setupData()
     ======================================================================*/
 
@@ -110,11 +127,8 @@ function callCountArea(chartID) {
             years.push(key);
         });
 
-        console.log("DATASETYEARS", datasetYears);
-
         datasetYears.forEach(function (d, i) {
-
-            //Add a new object to the new emissions data array so we have a dataset for the "total ratio" area and the "late stage ratio" chart
+            // Set up the data in a format that we can use to draw the chart - will push these to our final data array
             total.push({
                 county: county, // county name
                 cancer: cancerType,
@@ -133,7 +147,7 @@ function callCountArea(chartID) {
 
         });
 
-        // push both to datasetByCountType
+        // push both to datasetByCountType, the dataset we use for our charts - draws a chart from each object in this array
         datasetByCountType.push({
             Counting: "Total",
             counts: total
@@ -142,14 +156,12 @@ function callCountArea(chartID) {
             counts: lateStage
         });
 
-        console.log("DATASETBYCOUNTTYPE", datasetByCountType);
-
         //Set scale domains 
         xScale.domain(d3.extent(years, function (d) {
             return dateFormat.parse(d);
         }));
 
-        // domain is 0 - highest total of all counties (allCountiesDataset)
+        // domain is 0 to highest total of all counties (allCountiesDataset) so we have some reference for where this county stands compared to all
         yScale.domain([
            d3.max(allCountiesDataset, function (c) {
                 return c.total_ratio;
@@ -157,41 +169,18 @@ function callCountArea(chartID) {
                 ,
                     0
             ]);
+
     } // end setupData()
-    /*====================================================================
-    
+    /*====================================================================  
         draw()
-        ======================================================================*/
+ ======================================================================*/
     function draw() {
+        // draw our legend
         legend();
-        //Axes
-        svg.append("g")
-            .attr("class", "x axis")
-            .attr("transform", "translate(0," + (height - margin.bottom) + ")")
-            .call(xAxis)
-            .append("text")
-            .attr("class", "label")
-            .attr("x", width - margin.right)
-            .attr("y", 20)
-            .attr("dy", "2em")
-            .style("text-anchor", "end")
-            .attr("class", "label")
-            .text("Year");
-
-        svg.append("g")
-            .attr("class", "y axis")
-            .attr("transform", "translate(" + (margin.left) + ",0)")
-            .call(yAxis)
-            .append("text")
-            .attr("class", "label")
-            .attr("transform", "rotate(-90)")
-            .attr("x", -height + margin.bottom)
-            .attr("y", -60)
-            .attr("dy", "1em")
-            .style("text-anchor", "start")
-            .attr("class", "label")
-        .text("Rate per 100,000");
-
+        
+        // draw the axes
+        drawAxes();
+        
         // Create the line between the two circles - x and y values set later, on hover
         bindingLine = svg.append("line")
             .attr("class", "binding-line")
@@ -231,7 +220,6 @@ function callCountArea(chartID) {
                 return line(c.counts);
             });
 
-
         // Two circles to show the values for the year on hover
         circle = groups.append("circle")
             .attr("r", 5)
@@ -241,6 +229,7 @@ function callCountArea(chartID) {
             .attr("fill", "#fff")
             .style("pointer-events", "none");
 
+        // background rectangle that receives the mouse events
         svg.append("rect")
             .attr("class", "background")
             .style("pointer-events", "all")
@@ -253,59 +242,95 @@ function callCountArea(chartID) {
             .on("mousemove", mousemoveFunc)
             .on("mouseout", mouseoutFunc);
     } // end draw()
-    
-        /*====================================================================
+
+    /*====================================================================
          legend()
-    ======================================================================*/
+ ======================================================================*/
     function legend() {
+        // add the legend group element to the svg
         var legend = svg.append("g")
             .attr("class", "mylegend")
             .attr("transform", "translate(0,0)");
 
+        // icon values & space between legend elements
         var iconWidth = 35;
         var iconHeight = 10;
         var margin = 10;
-        
-        
+
+        // we set these manually because it's not based off of what's in an array/ we can't loop through an array to draw the icons in the legend
+
         var total = legend.append("g")
-                .attr("class", "legendGroup");
+            .attr("class", "legendGroup");
 
-            total.append("rect")
-                .attr("height", iconHeight)
-                .attr("width", iconWidth)
-                .attr("fill", "#f1735f")
+        total.append("rect")
+            .attr("height", iconHeight)
+            .attr("width", iconWidth)
+            .attr("fill", "#f1735f")
             .attr("opacity", .4);
-        
-            total.append("text")
-                .attr("x", iconWidth + 5)
-                .attr("y", iconHeight)
-                .style("text-anchor", "start")
-                .attr("class", "legendLabel")
-                .text("Overall Rate");
-        
-        var ls = legend.append("g")
-                .attr("class", "legendGroup")
-                .attr("transform", function () {
-                    return "translate(" + (total.node().getBBox().width + margin) + ",0)"
-                });
 
-            ls.append("rect")
-                .attr("height", iconHeight)
-                .attr("width", iconWidth)
-                .attr("fill", "#f1735f")
+        total.append("text")
+            .attr("x", iconWidth + 5)
+            .attr("y", iconHeight)
+            .style("text-anchor", "start")
+            .attr("class", "legendLabel")
+            .text("Overall Rate");
+
+        var ls = legend.append("g")
+            .attr("class", "legendGroup")
+            .attr("transform", function () {
+                return "translate(" + (total.node().getBBox().width + margin) + ",0)" // total.node().getBBox().width gives us the width of the "total" element (icon and text) we created above. Translate the next element over this much plus the margin
+            });
+
+        ls.append("rect")
+            .attr("height", iconHeight)
+            .attr("width", iconWidth)
+            .attr("fill", "#f1735f")
             .attr("opacity", .8);
-        
-            ls.append("text")
-                .attr("x", iconWidth + 5)
-                .attr("y", iconHeight)
-                .style("text-anchor", "start")
-                .attr("class", "legendLabel")
-                .text("Late Stage Rate");
+
+        ls.append("text")
+            .attr("x", iconWidth + 5)
+            .attr("y", iconHeight)
+            .style("text-anchor", "start")
+            .attr("class", "legendLabel")
+            .text("Late Stage Rate");
     } // end legend()
+    
+/*====================================================================
+         drawAxes()
+ ======================================================================*/    
+    function drawAxes() {
+     // X axis
+        svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + (height - margin.bottom) + ")")
+            .call(xAxis)
+            .append("text")
+            .attr("class", "label")
+            .attr("x", width - margin.right)
+            .attr("y", 20)
+            .attr("dy", "2em")
+            .style("text-anchor", "end")
+            .attr("class", "label")
+            .text("Year");
+        //Y axis
+        svg.append("g")
+            .attr("class", "y axis")
+            .attr("transform", "translate(" + (margin.left) + ",0)")
+            .call(yAxis)
+            .append("text")
+            .attr("class", "label")
+            .attr("transform", "rotate(-90)")
+            .attr("x", -height + margin.bottom)
+            .attr("y", -60)
+            .attr("dy", "1em")
+            .style("text-anchor", "start")
+            .attr("class", "label")
+            .text("Rate per 100,000");   
+    } // end drawAxes()
 
     /*====================================================================
          Mouse Functions
-    ======================================================================*/
+ ======================================================================*/
 
     function mouseoverFunc(d) {
         circle.attr("opacity", 1.0);
@@ -325,10 +350,10 @@ function callCountArea(chartID) {
         year = xScale.invert(d3.mouse(this)[0] + margin.left).getFullYear();
         date = dateFormat.parse('' + year);
         index = 0;
-        circle
+        circle // highlighting circles
             .attr("cx", xScale(date))
             .attr("cy", function (c) {
-                index = bisect(c.counts, year, 0, c.counts.length - 1);
+                index = bisect(c.counts, year, 0, c.counts.length - 1); // use bisect to find our index
                 if (c.Counting == "Total") {
                     y2 = yScale(+c.counts[index]["count"]);
                     tooltipTotal = d3.format(".2f")(+c.counts[index]["count"]);
@@ -341,12 +366,14 @@ function callCountArea(chartID) {
                 return yScale(+c.counts[index]["count"]);
             });
 
+        // settings for the line between our highlighted points
         bindingLine
             .attr("x1", xScale(date))
             .attr("y1", yScale(0))
             .attr("x2", xScale(date))
             .attr("y2", y2);
 
+        // set tooltip values
         return tooltip
             .style("top", (d3.event.pageY) - 80 + "px")
             .style("left", (d3.event.pageX + 15) + "px")
@@ -354,8 +381,8 @@ function callCountArea(chartID) {
     } // end mousemove
 
     function mouseoutFunc(d) {
-        bindingLine.attr("opacity", 0);
-        circle.attr("opacity", 0);
+        bindingLine.attr("opacity", 0); // hides the line
+        circle.attr("opacity", 0); // hides the circles
         return tooltip.style("display", "none"); // this hides the tooltip
     } // end mouseout
 

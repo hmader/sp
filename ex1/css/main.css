@@ -6,7 +6,7 @@ body {
     font-family: 'Lato', sans-serif;
     font-size: 16px;
     line-height: 1.5em;
-    margin: 1em;
+    padding: 1em;
     box-sizing: border-box;
 }
 
@@ -25,10 +25,19 @@ h1 {
 h3 {
     font-weight: bold;
     font-size: 1em;
-    max-width: 600px;
+    margin-bottom: 1.5em;
 }
 
 p {
+    font-weight: 300;
+}
+
+.chart-div-header {
+    font-size: 1.2em;
+    border-bottom: solid 2px;
+    text-transform: uppercase;
+    padding-bottom: .25em;
+    line-height: 2em;
     font-weight: 300;
 }
 
@@ -168,11 +177,14 @@ button.selected {
 
 .chart-div {
     width: 100%;
+    max-width: 800px;
+    margin: 5em auto;
 }
 
 .chart {
     width: 100%;
     max-width: 800px;
+    margin-top: 1em;
     margin-bottom: 2em;
     /*    margin: 0 auto 2em;*/
 }
@@ -229,6 +241,11 @@ svg {
 .legendLabel {
     font-size: .75em;
     font-weight: bold;
+}
+
+.zipcodeLabel {
+    font-size: .9em;
+ font-weight: bold;
 }
 
 .axis text {
