@@ -46,9 +46,9 @@ function callZipCodeLateStageRankings(chartID) {
         check to see if the dataset meets the cutoff - if yes, proceed, if not, draw the "not enough data" message
     ==================================================================*/
 // set up the data first, we check from the nonNullZips
-    setData();
+    setData();    
 
-    if (filteredZips.length < zipcodeListLength) {
+    if ((ranked[0]["highest"].length < zipcodeListLength) || (ranked[0]["lowest"].length < zipcodeListLength)) {
 
         notEnoughDataMessage(width, height, svg);
 
