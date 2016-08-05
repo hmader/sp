@@ -48,7 +48,7 @@ function callZipCodeRateRankings(chartID) {
 // set up the data first, we check from the nonNullZips
     setData();
 
-    if (filteredZips.length < zipcodeListLength) {
+    if ((ranked[0]["highest"].length < zipcodeListLength) || (ranked[0]["lowest"].length < zipcodeListLength)) {
 
         notEnoughDataMessage(width, height, svg);
 
