@@ -1,0 +1,303 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Lato', sans-serif;
+    font-size: 16px;
+    line-height: 1.5em;
+    box-sizing: border-box;
+    margin: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+    font-weight: 500;
+}
+
+h1 {
+    font-weight: bold;
+    font-size: 2em;
+    margin-bottom: 1.5em;
+    margin-top: 1.5em;
+    line-height: 1.4em;
+}
+
+h3 {
+    font-weight: bold;
+    font-size: 1em;
+    margin-bottom: 1.5em;
+}
+
+p {
+    font-weight: 300;
+}
+
+#intro {
+    padding: 2em 2em 1em;
+    max-width: 800px;
+}
+
+#search-wrap {
+    position: relative;
+    padding: 0 2em;
+    max-width: 800px;
+}
+
+#search-wrap:before {
+    content: '';
+    display: inline-block;
+    position: absolute;
+    border: 1.5px solid #cccccc;
+    background: #fff;
+    border-radius: 1em;
+    top: 50%;
+    width: 1em;
+    right: 3.5em;
+    transform: translateX(35%) translateY(25%) rotate(45deg);
+}
+
+#search-wrap:after {
+    content: '';
+    display: inline-block;
+    position: absolute;
+    border: 2px solid #cccccc;
+    background: #fff;
+    border-radius: 1em;
+    width: .75em;
+    height: .75em;
+    top: 45%;
+    right: 3.5em;
+    transform: translateY(-50%);
+}
+
+#search {
+    width: 100%;
+    padding: 1em;
+    border-radius: 4px;
+    border: solid 1px #aaa;
+    font-size: 1em;
+    font-weight: 300;
+}
+
+#chart-section {
+    display: -webkit-flex;
+    -webkit-flex-direction: row;
+    -webkit-flex-wrap: wrap;
+    -webkit-justify-content: center;
+    -webkit-align-items: flex-start;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    margin-bottom: 5em;
+    margin-top: 5em;
+}
+
+.view-map-link {
+    color: #337ab7;
+    font-size: 1em;
+    text-decoration: none;
+}
+
+.panel {
+    width: 100%;
+    max-width: 600px;
+    background-color: #fff;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+    margin: 1em;
+}
+
+.panel-heading {
+    padding: 10px 15px;
+    border-bottom: 1px solid transparent;
+    border-top-right-radius: 3px;
+    border-top-left-radius: 3px;
+}
+
+.panel-default {
+    border-color: #ddd;
+}
+
+.panel-default > .panel-heading {
+    color: #333333;
+    background-color: #f5f5f5;
+    border-color: #ddd;
+}
+
+.panel-body {
+    padding: 15px;
+}
+
+.chart {
+    width: 100%;
+    max-width: 800px;
+    margin-top: 1em;
+    margin-bottom: 2em;
+    /*    margin: 0 auto 2em;*/
+}
+
+
+.hidden {
+ visibility: hidden;
+}
+
+/*  tooltip  */
+
+.tooltip {
+    position: absolute;
+    z-index: 10;
+}
+
+.tooltip p {
+    background-color: rgba(255, 255, 255, .95);
+    border: 1px solid #000;
+    padding: .5em 1em;
+    font-size: 12px;
+    line-height: 17px;
+    color: black;
+}
+
+.tooltipHeader {
+    font-weight: 700;
+    font-size: 12.5px;
+}
+
+
+/*  svg text tooltip that appears over the chart, relative to the chart rather than relative to the cursor  */
+
+.chart-tooltip {
+    font-size: 12px;
+    fill: #000;
+}
+
+
+/*  CSS concerning the message that appears when there's not enough data to draw the chart  */
+
+.not-enough-data-message-text {}
+
+
+/*  chart elements  */
+
+svg {
+    background-color: rgba(255, 255, 255, 0);
+}
+
+.area {
+    stroke: none;
+}
+
+.chart-title {
+    font-weight: bold;
+}
+
+.legendLinear text,
+.smaller-bold,
+.legendLabel {
+    font-size: .75em;
+    font-weight: bold;
+}
+
+.zipcodeLabel {
+    font-size: .9em;
+    font-weight: bold;
+}
+
+.axis text {
+    font-size: .75em;
+    fill: #aaa;
+}
+
+.axis .subtitle,
+.multiples-caption,
+.curYear,
+.static-year,
+.subtitle {
+    fill: #666;
+    font-size: .75em;
+}
+
+.multiples-subtitle,
+.axis.multiple text {
+    font-size: .7em;
+}
+
+.axis .label {
+    fill: #666;
+    font-size: .85em;
+}
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: #aaa;
+    shape-rendering: crispEdges;
+}
+
+.y.axis .tick line,
+.x.axis .tick line {
+    stroke: #f2f2f2;
+}
+
+.y.axis .tick:first-child line {
+    stroke: #000;
+    stroke-width: 0;
+    opacity: 0;
+}
+
+.y.axis .domain {
+    stroke: none;
+}
+
+.axis.hide-ticks g.tick text {
+    display: none;
+}
+
+.line {
+    fill: none;
+}
+
+.bindingLine {
+    stroke: #2A2A2A;
+    fill: none;
+    stroke-opacity: 100%;
+    stroke-width: 1px;
+}
+
+.bar:hover,
+.bar.hover,
+.layer:hover,
+path.arc:hover {
+    opacity: 1;
+}
+
+.bar,
+.layer,
+path.arc {
+    transition: .35s;
+}
+
+.hidden {
+    display: none;
+    opacity: 0.0;
+}
+
+@media only screen and (min-width: 700px) {
+    #intro,
+    #search-wrap {
+        margin: 0 auto;
+    }
+}
+
+@media only screen and (min-width: 1264px) {
+    #intro,
+    #search-wrap {
+        margin: 0;
+    }
+}

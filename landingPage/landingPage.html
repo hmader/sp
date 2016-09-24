@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Scan Portal Landing Page</title>
+    <link href='https://fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="css/main.css">
+    <!--    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"></script>-->
+    <!--    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>-->
+</head>
+
+<body>
+    <section id="intro">
+        <h1>Welcome to the Sylvester ScanPortal</h1>
+        <p>This site contains data visualizations for cancer in the state of Florida. Please select a cancer to start exploring the data.</p>
+    </section>
+    <div id="search-wrap" class="hidden"><input type="text" id="search" placeholder="Search for a cancer"></div>
+    <section id="chart-section">
+    </section>
+
+    <!--  Scripts  -->
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+    <script src="//d3js.org/d3.v3.min.js"></script>
+    <script src="//d3js.org/queue.v1.min.js"></script>
+    <script type="text/javascript" src="js/callCancerRanking.js"></script>
+    <script type="text/javascript" src="js/callSelectedCancerLine.js"></script>
+    <script type="text/javascript" src="js/json-api.js"></script>
+    <!--  end Scripts  -->
+</body>
+
+</html>
