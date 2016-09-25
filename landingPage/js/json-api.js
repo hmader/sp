@@ -10,7 +10,7 @@ var not_enough_data_message_text = " - Not Enough Data to Draw Chart -";
 /************************************
 These variables affect the api route 
 *************************************/
-var year = 2011; // year
+var year = 2013; // year
 var cancerType; // cancer number
 var cancerName;
 
