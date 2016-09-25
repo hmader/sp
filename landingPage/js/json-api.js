@@ -10,7 +10,7 @@ var not_enough_data_message_text = " - Not Enough Data to Draw Chart -";
 /************************************
 These variables affect the api route 
 *************************************/
-var year = 2013; // year
+var year = 2011; // year
 var cancerType; // cancer number
 var cancerName;
 
@@ -136,7 +136,7 @@ function fillPanels() {
     =====================================================================*/
     function setup(chartID) {
         // append chart div
-        var element = ('<div class="panel panel-default"><div class="panel-heading">' + cancerName + '</div><div class="panel-body"><a class="view-map-link" href="#">View Map ></a><div id="' + chartID + '" class="chart chart-id-' + cancerType + '"></div></div></div>');
+        var element = ('<div class="panel panel-default"><div class="panel-heading">' + cancerName + '</div><div class="panel-body"><a class="view-map-link" href="http://scanportal.org/map/'+  chartID.replace("chart", "") +'/adjusted/state">View Map ></a><div id="' + chartID + '" class="chart chart-id-' + cancerType + '"></div></div></div>');
 
         $('section#chart-section').append(element);
     } // end setup
